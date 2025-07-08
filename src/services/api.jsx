@@ -52,3 +52,58 @@ export const login = async (data) => {
     };
   }
 };
+
+export const addAccount = async (data) => {
+  try {
+    const formData = new FormData();
+    formData.append("currency", data.currency);
+    formData.append("type", data.type);
+
+    return await apiClient.post("/account/createAccount", data);
+  } catch (e) {
+    return { error: true, e };
+  }
+}
+
+export const getMyAccounts = async () => {
+  try {
+    return await apiClient.get("/account/getMyAccounts");
+  } catch (e) {
+    return { error: true, e };
+  }
+}
+
+export const setTransaction = async (data) => {
+  try {
+    const formData = new FormData();
+    formData.append("fromAccount", data.fromAccount);
+    formData.append("toAccount", data.toAccount);
+    formData.append("amount", data.amount);
+
+    return await apiClient.post("/account/createTransaction", data);
+  } catch (e) {
+    console.log(e);
+    return { error: true, e };
+  }
+} 
+
+export const setDeposit = async (data) => {
+  try {
+    const formData = new FormData();
+    formData.append("account", data.fromAccount);
+    formData.append("amount", data.amount);
+
+    return await apiClient.post("/account/createDeposit", data);
+  } catch (e) {
+    console.log(e);
+    return { error: true, e };
+  }
+}
+
+export const deleteAccount = async (id) => {
+  try {
+    return await apiClient.delete(`/account/deleteAccount/${id}`);
+  } catch (e) {
+    return { error: true, e };
+  }
+}

@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { useAddTransaction } from '../../shared/hooks/useAddTransaction'
-import { useGetMyAccounts } from '../../shared/hooks/useGetMyAccounts'
+import { useAddDeposit } from '../../shared/hooks/useAddDeposit';
 
-export const TransfersPage = () => {
-  const { addTransaction } = useAddTransaction();
-  const { accounts, fetchAccounts, isLoading } = useGetMyAccounts();
+export const DepositPage = () => {
+  const { addDeposit } = useAddDeposit();
   
-  useEffect(() => {
-      fetchAccounts();
-  }, [fetchAccounts]);
-
-  const [formData, setFormData] = useState({fromAccount: '', toAccount: '', amount: ''})
+  const [formData, setFormData] = useState({fromAccount: '', amount: ''})
 
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -19,7 +13,6 @@ export const TransfersPage = () => {
   const validate = () => {
     const newErrors = {}
     if (!formData.fromAccount) newErrors.fromAccount = 'Selecciona una cuenta de origen'
-    if (!formData.toAccount) newErrors.toAccount = 'Ingresa la cuenta de destino'
     if (!formData.amount || Number(formData.amount) <= 0) newErrors.amount = 'Ingresa un amount válido'
     return newErrors
   }
@@ -41,8 +34,8 @@ export const TransfersPage = () => {
       const validationErrors = validate()
       setErrors(validationErrors)
       if (Object.keys(validationErrors).length > 0) return
-      await addTransaction(formData);
-      setFormData({fromAccount: '', toAccount: '', amount: ''});
+      await addDeposit(formData);
+      setFormData({fromAccount: '', amount: ''});
   };
 
   if (success) {
@@ -51,22 +44,18 @@ export const TransfersPage = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
           <div className="mb-6">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">¡Transferencia Exitosa!</h2>
-            <p className="text-gray-600">Tu transferencia ha sido procesada correctamente.</p>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">¡Deposito Exitoso!</h2>
+            <p className="text-gray-600">Tu deposito ha sido procesada correctamente.</p>
           </div>
           
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-gray-600">Monto:</span>
+              <span className="text-sm text-gray-600">amount:</span>
               <span className="font-semibold text-lg">${parseFloat(formData.amount).toLocaleString()}</span>
             </div>
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">Desde:</span>
               <span className="font-mono text-sm">{formData.accountOrigin}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Hacia:</span>
-              <span className="font-mono text-sm">{formData.toAccount}</span>
             </div>
           </div>
         </div>
@@ -82,55 +71,10 @@ export const TransfersPage = () => {
             <h1 className="text-2xl font-bold text-white flex items-center gap-3">
               Transferencia Bancaria
             </h1>
-            <p className="text-blue-100 mt-2">Transfiere dinero de forma rápida y segura</p>
+            <p className="text-blue-100 mt-2">Deposita dinero de forma rápida y segura</p>
           </div>
 
           <div className="p-8 space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
-                Cuenta de Origen
-              </label>
-              <div className="space-y-2">
-                {accounts.map((account) => (
-                  <div key={account._id} className="relative">
-                    <input
-                      type="radio"
-                      id={account.noAccount}
-                      name="fromAccount"
-                      value={account.noAccount}
-                      checked={formData.fromAccount === account.noAccount}
-                      onChange={handleInputChange}
-                      className="sr-only"
-                    />
-                    <label
-                      htmlFor={account.noAccount}
-                      className={`block p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                        formData.fromAccount === account.noAccount
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <div className="font-mono text-sm font-semibold">{account.noAccount}</div>
-                          <div className="text-xs text-gray-600">{account.type}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-semibold">{account.currency} {account.amount}</div>
-                          <div className="text-xs text-gray-600">Saldo disponible</div>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                ))}
-              </div>
-              {errors.fromAccount && (
-                <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                  {errors.fromAccount}
-                </p>
-              )}
-            </div>
-
             <div className="flex justify-center">
               <div className="bg-blue-100 rounded-full p-3">
               </div>
@@ -142,20 +86,20 @@ export const TransfersPage = () => {
               </label>
               <input
                 type="text"
-                id="toAccount"
-                name="toAccount"
-                value={formData.toAccount}
+                id="fromAccount"
+                name="fromAccount"
+                value={formData.fromAccount}
                 onChange={handleInputChange}
                 placeholder="Ingresa el número de cuenta de destino"
                 className={`w-full px-4 py-3 rounded-lg border-2 font-mono transition-colors ${
-                  errors.toAccount 
+                  errors.fromAccount 
                     ? 'border-red-300 focus:border-red-500' 
                     : 'border-gray-200 focus:border-blue-500'
                 } focus:outline-none`}
               />
-              {errors.toAccount && (
+              {errors.fromAccount && (
                 <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                  {errors.toAccount}
+                  {errors.fromAccount}
                 </p>
               )}
             </div>
@@ -203,10 +147,10 @@ export const TransfersPage = () => {
               {isSubmitting ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Procesando transferencia...
+                  Procesando deposito...
                 </div>
               ) : (
-                'Realizar Transferencia'
+                'Realizar Deposito'
               )}
             </button>
             {errors.general && (

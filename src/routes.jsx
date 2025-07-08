@@ -4,6 +4,9 @@ import { AuthPage } from "./pages/auth/AuthPage";
 import { VerifyEmail } from "./components/auth/VerifyEmail";
 import { UsersPage } from "./components/users/UsersPage"
 import { AccountsPage } from "./components/accounts/AccountsPage";
+import { MyAccountsPage } from "./components/accounts/MyAccountsPage";
+import { DepositPage } from "./components/transfers/DepositPage";
+import DeleteMyAccount from "./components/accounts/DeleteMyAccount";
 import { TransfersPage } from "./components/transfers/TransfersPage"
 
 export const routes = [
@@ -15,7 +18,10 @@ export const routes = [
         children: [
         { path: "usuarios", element: <UsersPage /> },
         { path: "cuentas", element: <AccountsPage /> },
-        { path: "transferencias", element: <TransfersPage /> }
+        { path : "mis-cuentas", element: <MyAccountsPage /> },
+        { path: "transferencias", element: <TransfersPage /> },
+        { path: "cuentas/eliminar/:id", element: <DeleteMyAccount /> },
+        { path : "depositos", element: <DepositPage /> },
         ],
     },
     { path: "/", element: <VisitorPage /> },
