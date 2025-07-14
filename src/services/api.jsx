@@ -107,3 +107,12 @@ export const deleteAccount = async (id) => {
     return { error: true, e };
   }
 }
+
+export const myHistorial = async (data) => {
+  try {
+    console.log(data);
+    return await apiClient.post("/account/getDepositHistory", data);
+  } catch (e) {
+    return { error: true, e };
+  }
+}

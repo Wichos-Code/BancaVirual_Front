@@ -8,6 +8,8 @@ import { MyAccountsPage } from "./components/accounts/MyAccountsPage";
 import { DepositPage } from "./components/transfers/DepositPage";
 import DeleteMyAccount from "./components/accounts/DeleteMyAccount";
 import { TransfersPage } from "./components/transfers/TransfersPage"
+import { HistorialPage } from "./components/transfers/HistorialPage";
+import { path } from "framer-motion/client";
 
 export const routes = [
     { path: "/bancavirtual/acceso", element: <AuthPage /> },
@@ -22,6 +24,7 @@ export const routes = [
         { path: "transferencias", element: <TransfersPage /> },
         { path: "cuentas/eliminar/:id", element: <DeleteMyAccount /> },
         { path : "depositos", element: <DepositPage /> },
+        { path: "my-historial/:noAccount", element: <HistorialPage /> },
         ],
     },
     { path: "/", element: <VisitorPage /> },

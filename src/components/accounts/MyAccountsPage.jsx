@@ -93,7 +93,8 @@ export const MyAccountsPage = () => {
                                     onClick={() => goToNavigate('/bancavirtual/transferencias')}>
                                         Transferir
                                     </button>
-                                    <button className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm flex items-center justify-center hover:bg-gray-200 transition-colors">
+                                    <button className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm flex items-center justify-center hover:bg-gray-200 transition-colors"
+                                    onClick={() => goToNavigate(`/bancavirtual/my-historial/${account.noAccount}`)}>
                                         Estado
                                     </button>
                                     <DeleteMyAccount id={account._id} onDeleted={fetchAccounts} />
