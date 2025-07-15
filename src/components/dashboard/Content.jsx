@@ -7,6 +7,7 @@ const SECTIONS = {
   users: "/bancavirtual/usuarios",
   accounts: "/bancavirtual/cuentas",
   transfers: "/bancavirtual/transferencias",
+  myaccounts: "/bancavirtual/mis-cuentas",
 };
 
 export function Content() {

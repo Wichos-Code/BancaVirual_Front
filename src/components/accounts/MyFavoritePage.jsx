@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { useGetMyAccounts } from '../../shared/hooks/useGetMyAccounts';
+import { useMyFavoriteAccounts } from '../../shared/hooks/useMyFavoriteAccounts';
 import { useNavigate } from 'react-router-dom';
 import DeleteMyAccount from './DeleteMyAccount';
 
-export const MyAccountsPage = () => {
-    const { accounts, fetchAccounts, isLoading } = useGetMyAccounts();
+export const MyFavoritePage = () => {
+    const { favorites, fetchFavorites, isLoading } = useMyFavoriteAccounts();
 
     useEffect(() => {
-        fetchAccounts();
-    }, [fetchAccounts]);
+        fetchFavorites();
+    }, [fetchFavorites]);
 
     const handleChange = (e) => {
         const { name, type, value, files } = e.target;
@@ -27,7 +27,7 @@ export const MyAccountsPage = () => {
     }
 
     const handleUpdate = async (e) => {
-        fetchAccounts();
+        fetchFavorites();
     };
     
     return (
@@ -35,7 +35,7 @@ export const MyAccountsPage = () => {
         <div className="max-w-2xl mx-auto">
             <div className="bg-white rounded-2xl shadow-xl p-8">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Mis Cuentas</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Mis Cuentas Favoritas</h1>
                     <p className="text-gray-600">Lista de Cuentas Registradas</p>
                 </div>
     
@@ -52,17 +52,13 @@ export const MyAccountsPage = () => {
                                 onClick={handleUpdate}>
                                 Actualizar
                                 </button>
-                                <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center hover:bg-gray-200 transition-colors"
-                                onClick={() => goToNavigate('/bancavirtual/my-favorites')}>
-                                Mis favoritos
-                                </button>
                             </div>
                             </div>
 
                             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-                            {accounts.map((account) => (
+                            {favorites.map((favorite) => (
                                 <div
-                                key={account._id}
+                                key={favorite._id}
                                 className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
                                 
                                 >
@@ -72,15 +68,15 @@ export const MyAccountsPage = () => {
 
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-gray-900">{account.type}</h3>
-                                        <p className="text-sm text-gray-600">{account.noAccount}</p>
+                                        <h3 className="font-semibold text-gray-900">{favorite.type}</h3>
+                                        <p className="text-sm text-gray-600">{favorite.noAccount}</p>
                                     </div>
                                     </div>
                                     <div className="text-right">
                                     <div className="text-2xl font-bold text-gray-900">
                                     </div>
                                     <div className="text-sm text-gray-600">
-                                        {account.moneda}
+                                        {favorite.currency}
                                     </div>
                                     </div>
                                 </div>
@@ -88,7 +84,7 @@ export const MyAccountsPage = () => {
                                 <div className="border-t pt-4">
                                     <div className="flex justify-between items-center mb-2">
                                     <span className="text-sm text-gray-600">Saldo disponible</span>
-                                    <p className="text-sm text-gray-600">{account.amount}</p>
+                                    <p className="text-sm text-gray-600">{favorite.amount}</p>
                                     <span className="text-sm font-medium">
                                     </span>
                                     </div>
@@ -98,10 +94,10 @@ export const MyAccountsPage = () => {
                                         Transferir
                                     </button>
                                     <button className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm flex items-center justify-center hover:bg-gray-200 transition-colors"
-                                    onClick={() => goToNavigate(`/bancavirtual/my-historial/${account.noAccount}`)}>
+                                    onClick={() => goToNavigate(`/bancavirtual/my-historial/${favorite.noAccount}`)}>
                                         Estado
                                     </button>
-                                    <DeleteMyAccount id={account._id} onDeleted={fetchAccounts} />
+                                    <DeleteMyAccount id={favorite._id} onDeleted={fetchFavorites} />
                                     </div>
                                 </div>
                                 </div>

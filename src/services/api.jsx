@@ -116,3 +116,11 @@ export const myHistorial = async (data) => {
     return { error: true, e };
   }
 }
+
+export const getMyFavoriteAccounts = async () => {
+  try {
+    return await apiClient.get("/account/getFavorites");
+  } catch (e) {
+    return { error: true, e };
+  }
+}
