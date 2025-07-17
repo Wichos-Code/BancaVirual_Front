@@ -128,7 +128,7 @@ export const getMyFavoriteAccounts = async () => {
 export const setFavoriteAccount = async (data) => {
   try {
 
-    return await apiClient.put("/account/setFavorite", data);
+    return await apiClient.put("/account/addFavorite", data);
   } catch (e) {
     console.log(e);
     return { error: true, e };
