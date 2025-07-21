@@ -16,6 +16,7 @@ import {
   validatePasswordConfirm, validatePasswordConfirmMessage
 } from "../../shared/validators";
 import { useRegister } from "../../shared/hooks/useRegister";
+import backgroundRegister from "../../assets/img/backgroundRegister.png";
 
 export const Register = ({ switchAuthHandler }) => {
   const navigate = useNavigate();
@@ -95,136 +96,145 @@ export const Register = ({ switchAuthHandler }) => {
     !form.passwordConfirm.isValid;
 
   return (
-    <div className="w-full max-w-md mx-auto bg-[#163a5d] rounded-2xl p-8 flex flex-col items-center space-y-4 shadow-lg">
-      <Logo text="Bienvenido al registro" />
+    <div
+      className="min-h-screen w-full flex items-center justify-center bg-cover bg-center"
+      style={{
+        backgroundImage: `url(${backgroundRegister})`,
+        backgroundColor: "rgba(22, 58, 93, 0)",
+        backgroundBlendMode: "overlay"
+      }}
+    >
+      <div className="w-full max-w-md mx-auto bg-[#163a5d]/40 rounded-2xl p-8 flex flex-col items-center space-y-4 shadow-lg">
+        <Logo text="Bienvenido al registro" />
 
-      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
-        <Input
-          field="name"
-          value={form.name.value}
-          onChangeHandler={onChange}
-          onBlurHandler={onBlur}
-          showErrorMessage={form.name.showError}
-          validationMessage={validateNameMessage}
-          type="text"
-          placeholder="Nombres"
-        />
-        <Input
-          field="surname"
-          value={form.surname.value}
-          onChangeHandler={onChange}
-          onBlurHandler={onBlur}
-          showErrorMessage={form.surname.showError}
-          validationMessage={validateSurnameMessage}
-          type="text"
-          placeholder="Apellidos"
-        />
-        <Input
-          field="username"
-          value={form.username.value}
-          onChangeHandler={onChange}
-          onBlurHandler={onBlur}
-          showErrorMessage={form.username.showError}
-          validationMessage={validateUsernameMessage}
-          type="text"
-          placeholder="Nombre de usuario"
-        />
-        <Input
-          field="dpi"
-          value={form.dpi.value}
-          onChangeHandler={onChange}
-          onBlurHandler={onBlur}
-          showErrorMessage={form.dpi.showError}
-          validationMessage={validateDPIMessage}
-          type="text"
-          placeholder="DPI"
-        />
-        <Input
-          field="email"
-          value={form.email.value}
-          onChangeHandler={onChange}
-          onBlurHandler={onBlur}
-          showErrorMessage={form.email.showError}
-          validationMessage={validateEmailMessage}
-          type="email"
-          placeholder="ejemplo@gmail.com"
-        />
-        <Input
-          field="income"
-          value={form.income.value}
-          onChangeHandler={onChange}
-          onBlurHandler={onBlur}
-          showErrorMessage={form.income.showError}
-          validationMessage={validateIncomeMessage}
-          type="number"
-          placeholder="Ingreso"
-        />
-        <Input
-          field="direction"
-          value={form.direction.value}
-          onChangeHandler={onChange}
-          onBlurHandler={onBlur}
-          showErrorMessage={form.direction.showError}
-          validationMessage={validateDirectionMessage}
-          type="text"
-          placeholder="Dirección"
-        />
-        <Input
-          field="phone"
-          value={form.phone.value}
-          onChangeHandler={onChange}
-          onBlurHandler={onBlur}
-          showErrorMessage={form.phone.showError}
-          validationMessage={validatePhoneMessage}
-          type="tel"
-          placeholder="+502 1000 0000"
-        />
-        <Input
-          field="password"
-          value={form.password.value}
-          onChangeHandler={onChange}
-          onBlurHandler={onBlur}
-          showErrorMessage={form.password.showError}
-          validationMessage={validatePasswordMessage}
-          type="password"
-          placeholder="Contraseña"
-        />
-        <Input
-          field="passwordConfirm"
-          value={form.passwordConfirm.value}
-          onChangeHandler={onChange}
-          onBlurHandler={onBlur}
-          showErrorMessage={form.passwordConfirm.showError}
-          validationMessage={validatePasswordConfirmMessage}
-          type="password"
-          placeholder="Confirmar contraseña"
-        />
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
+          <Input
+            field="name"
+            value={form.name.value}
+            onChangeHandler={onChange}
+            onBlurHandler={onBlur}
+            showErrorMessage={form.name.showError}
+            validationMessage={validateNameMessage}
+            type="text"
+            placeholder="Nombres"
+          />
+          <Input
+            field="surname"
+            value={form.surname.value}
+            onChangeHandler={onChange}
+            onBlurHandler={onBlur}
+            showErrorMessage={form.surname.showError}
+            validationMessage={validateSurnameMessage}
+            type="text"
+            placeholder="Apellidos"
+          />
+          <Input
+            field="username"
+            value={form.username.value}
+            onChangeHandler={onChange}
+            onBlurHandler={onBlur}
+            showErrorMessage={form.username.showError}
+            validationMessage={validateUsernameMessage}
+            type="text"
+            placeholder="Nombre de usuario"
+          />
+          <Input
+            field="dpi"
+            value={form.dpi.value}
+            onChangeHandler={onChange}
+            onBlurHandler={onBlur}
+            showErrorMessage={form.dpi.showError}
+            validationMessage={validateDPIMessage}
+            type="text"
+            placeholder="DPI"
+          />
+          <Input
+            field="email"
+            value={form.email.value}
+            onChangeHandler={onChange}
+            onBlurHandler={onBlur}
+            showErrorMessage={form.email.showError}
+            validationMessage={validateEmailMessage}
+            type="email"
+            placeholder="ejemplo@gmail.com"
+          />
+          <Input
+            field="income"
+            value={form.income.value}
+            onChangeHandler={onChange}
+            onBlurHandler={onBlur}
+            showErrorMessage={form.income.showError}
+            validationMessage={validateIncomeMessage}
+            type="number"
+            placeholder="Ingreso"
+          />
+          <Input
+            field="direction"
+            value={form.direction.value}
+            onChangeHandler={onChange}
+            onBlurHandler={onBlur}
+            showErrorMessage={form.direction.showError}
+            validationMessage={validateDirectionMessage}
+            type="text"
+            placeholder="Dirección"
+          />
+          <Input
+            field="phone"
+            value={form.phone.value}
+            onChangeHandler={onChange}
+            onBlurHandler={onBlur}
+            showErrorMessage={form.phone.showError}
+            validationMessage={validatePhoneMessage}
+            type="tel"
+            placeholder="+502 1000 0000"
+          />
+          <Input
+            field="password"
+            value={form.password.value}
+            onChangeHandler={onChange}
+            onBlurHandler={onBlur}
+            showErrorMessage={form.password.showError}
+            validationMessage={validatePasswordMessage}
+            type="password"
+            placeholder="Contraseña"
+          />
+          <Input
+            field="passwordConfirm"
+            value={form.passwordConfirm.value}
+            onChangeHandler={onChange}
+            onBlurHandler={onBlur}
+            showErrorMessage={form.passwordConfirm.showError}
+            validationMessage={validatePasswordConfirmMessage}
+            type="password"
+            placeholder="Confirmar contraseña"
+          />
 
-        <button
-          type="submit"
-          disabled={disabled}
-          className="
-            w-60
-            mt-3
-            mx-auto
-            py-3
-            rounded-full
-            text-[#163a5d] bg-yellow-200
-            hover:opacity-90 disabled:opacity-50
-            transition
-          "
-          style={{ fontWeight: "620" }}
+          <button
+            type="submit"
+            disabled={disabled}
+            className="
+              w-60
+              mt-3
+              mx-auto
+              py-3
+              rounded-full
+              text-[#163a5d] bg-yellow-200
+              hover:opacity-90 disabled:opacity-50
+              transition
+            "
+            style={{ fontWeight: "620" }}
+          >
+            {isLoading ? "Creando cuenta…" : "Crear cuenta"}
+          </button>
+        </form>
+
+        <p
+          onClick={switchAuthHandler}
+          className="text-white hover:underline cursor-pointer mb-4 mt-2"
         >
-          {isLoading ? "Creando cuenta…" : "Crear cuenta"}
-        </button>
-      </form>
-
-      <p
-        onClick={switchAuthHandler}
-        className="text-white hover:underline cursor-pointer mb-4 mt-2"
-      >
-        ¿Ya tienes cuenta? <strong>Inicia sesión</strong>
-      </p>
+          ¿Ya tienes cuenta? <strong>Inicia sesión</strong>
+        </p>
+      </div>
     </div>
   );
 };
