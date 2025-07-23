@@ -1,15 +1,13 @@
-// src/components/UsersList.jsx
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUsers } from "../../shared/hooks/useUsers.jsx";
 import { useDeleteUser } from "../../shared/hooks/useDeleteUser.jsx";
-import { useCreateUser } from "../../shared/hooks/useCreateUser.jsx"; // ¡Importar el nuevo hook!
-import { useUpdateUser } from "../../shared/hooks/userUpdateUser.jsx"; // ¡Importar el nuevo hook!
+import { useCreateUser } from "../../shared/hooks/useCreateUser.jsx";
+import { useUpdateUser } from "../../shared/hooks/userUpdateUser.jsx";
 import { Spinner } from "../Spinner.jsx";
-import { UserModal } from "./UserModal.jsx"; // ¡Importar el nuevo componente de modal!
+import { UserModal } from "./UserModal.jsx";
 import toast from "react-hot-toast";
 
-// Animaciones con Framer Motion (ya las tienes, las mantengo)
 const containerVariants = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.4 } },
@@ -25,14 +23,13 @@ const buttonVariants = {
 export const UsersList = () => {
   const { users, total, loading, error, refetch } = useUsers();
   const { deleteUser, loading: deleting } = useDeleteUser();
-  const { createNewUser, loading: creating } = useCreateUser(); // Usar el hook de creación
-  const { updateExistingUser, loading: updating } = useUpdateUser(); // Usar el hook de actualización
+  const { createNewUser, loading: creating } = useCreateUser();
+  const { updateExistingUser, loading: updating } = useUpdateUser();
 
   const [showSpinner, setShowSpinner] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Estado para controlar si el modal está abierto
-  const [userToEdit, setUserToEdit] = useState(null); // Estado para almacenar los datos del usuario a editar
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userToEdit, setUserToEdit] = useState(null);
 
-  // Controlar el spinner de forma más granular para que cubra todos los estados de carga
   useEffect(() => {
     if (loading || deleting || creating || updating) {
       setShowSpinner(true);
@@ -55,29 +52,26 @@ export const UsersList = () => {
     const result = await deleteUser(dpi);
     if (result?.success) {
       toast.success("Usuario eliminado correctamente.");
-      refetch(); // Volver a cargar la lista de usuarios para reflejar el cambio
+      refetch();
     } else {
-      // Ajuste para acceder al mensaje de error del backend
       const errorMessage = result?.e?.response?.data?.message || "Error al eliminar el usuario.";
       toast.error(errorMessage);
     }
   };
 
   const handleAddUserClick = () => {
-    setUserToEdit(null); // Asegurarse de que no haya datos de edición
-    setIsModalOpen(true); // Abrir el modal en modo "crear"
+    setUserToEdit(null);
+    setIsModalOpen(true);
   };
 
   const handleEditUserClick = (user) => {
-    // Es crucial que el `user` que pasas aquí contenga `dpi` y `role` entre otros datos necesarios
-    // para que el modal y las operaciones de actualización funcionen correctamente.
-    setUserToEdit(user); // Cargar los datos del usuario a editar
-    setIsModalOpen(true); // Abrir el modal en modo "editar"
+    setUserToEdit(user);
+    setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setUserToEdit(null); // Limpiar el usuario a editar al cerrar el modal
+    setUserToEdit(null);
   };
 
    const handleFormSubmit = async (formData) => {
@@ -138,7 +132,6 @@ export const UsersList = () => {
     );
   }
 
-  // Cuando no hay usuarios, mostrar un mensaje y el botón para agregar
   if (!users || users.length === 0) {
     return (
       <motion.div
@@ -158,7 +151,6 @@ export const UsersList = () => {
         >
           Agregar Usuario
         </motion.button>
-        {/* El modal se renderiza aquí para que esté disponible incluso sin usuarios */}
         <UserModal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
@@ -208,7 +200,6 @@ export const UsersList = () => {
           Total de usuarios: <span className="font-bold text-white">{total}</span>
         </motion.p>
 
-        {/* Contenedor con overflow-x-auto para el scroll horizontal */}
         <div className="overflow-x-auto rounded-lg shadow-lg no-scrollbar">
           <table className="min-w-full divide-y divide-gray-200 bg-white">
             <thead className="bg-yellow-200 text-black">
@@ -267,14 +258,12 @@ export const UsersList = () => {
                     <td className="px-4 py-3 whitespace-nowrap text-sm">{user.direction || "-"}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm">{user.workName || "-"}</td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold">
-                      {/* Mostrar el campo 'income' del backend, formateado */}
                       {user.income ? `Q${user.income.toFixed(2)}` : "-"}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm flex gap-2"> {/* Usar flex y gap para botones */}
-                      {/* Botón Editar */}
+                    <td className="px-4 py-3 whitespace-nowrap text-sm flex gap-2">
                       <motion.button
-                        onClick={() => handleEditUserClick(user)} // Pasa todo el objeto usuario
-                        disabled={updating || user.role === "ADMIN_ROLE"} // Deshabilitar si se está actualizando o si es un ADMIN_ROLE
+                        onClick={() => handleEditUserClick(user)}
+                        disabled={updating || user.role === "ADMIN_ROLE"}
                         variants={buttonVariants}
                         whileTap="whileTap"
                         whileHover="whileHover"
@@ -290,10 +279,9 @@ export const UsersList = () => {
                         {updating ? "Editando..." : "Editar"}
                       </motion.button>
 
-                      {/* Botón Eliminar */}
                       <motion.button
-                        onClick={() => handleDelete(user.dpi, user.role)} // Pasa el DPI y el rol a la función handleDelete
-                        disabled={deleting || user.role === "ADMIN_ROLE"} // Deshabilitar si ya se está eliminando o si es un ADMIN_ROLE
+                        onClick={() => handleDelete(user.dpi, user.role)}
+                        disabled={deleting || user.role === "ADMIN_ROLE"}
                         variants={buttonVariants}
                         whileTap="whileTap"
                         whileHover="whileHover"
@@ -316,13 +304,12 @@ export const UsersList = () => {
           </table>
         </div>
       </motion.div>
-      {/* Renderiza el modal fuera del div principal para que se posicione correctamente */}
       <UserModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleFormSubmit}
         isLoading={creating || updating}
-        initialData={userToEdit} // Pasar el usuario a editar al modal
+        initialData={userToEdit}
       />
     </AnimatePresence>
   );

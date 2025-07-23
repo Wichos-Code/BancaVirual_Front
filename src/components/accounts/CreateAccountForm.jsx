@@ -1,17 +1,17 @@
-// src/components/CreateAccountForm.jsx (o AccountsPage.jsx si mantienes el nombre)
 import React, { useState } from 'react';
-import { useCreateAccount } from '../../shared/hooks/useCreateAccount'; // Ruta a tu hook
+import { useCreateAccount } from '../../shared/hooks/useCreateAccount';
 
-export const CreateAccountForm = () => { // Cambiado el nombre para claridad
+export const CreateAccountForm = () => {
     const { registerAccount, isLoading } = useCreateAccount();
     const [form, setForm] = useState({
-        searchTerm: '',      // Para DPI o username
-        searchType: 'username', // 'username' o 'dpi'
-        amount: '',          // Nuevo campo para el monto inicial
-        currency: 'GTQ',     // Moneda por defecto
-        type: 'Savings'      // Tipo por defecto
+        searchTerm: '',
+        searchType: 'username',
+        amount: '',
+        currency: 'GTQ',
+        type: 'Savings'
     });
-    const [message, setMessage] = useState(''); // Para mensajes de éxito/error
+    const [message, setMessage] = useState('');
+    const [isSuccessMessage, setIsSuccessMessage] = useState(false); // Nuevo estado para controlar el tipo de mensaje
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -20,29 +20,30 @@ export const CreateAccountForm = () => { // Cambiado el nombre para claridad
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setMessage(''); // Limpiar mensajes previos
+        setMessage(''); // Limpia el mensaje anterior
+        setIsSuccessMessage(false); // Restablece el estado del tipo de mensaje
 
         const dataToSend = {
-            amount: parseFloat(form.amount), // Asegurar que el monto sea un número
+            amount: parseFloat(form.amount),
             currency: form.currency,
             type: form.type,
         };
 
-        // Añadir el campo de búsqueda según el tipo seleccionado
         if (form.searchType === 'username') {
             dataToSend.targetUsername = form.searchTerm.trim();
-        } else if (form.searchType === 'dpi') { // Corregido a 'dpi' en minúsculas
+        } else if (form.searchType === 'dpi') {
             dataToSend.targetDPI = form.searchTerm.trim();
         }
 
         const response = await registerAccount(dataToSend);
 
         if (response.error) {
-            setMessage(`❌ Error: ${response.message || 'Error al crear la cuenta.'}`);
+            setMessage(`Error: ${response.message || 'Error al crear la cuenta.'}`);
+            setIsSuccessMessage(false); // Es un mensaje de error
         } else {
-            setMessage(`✅ ${response.data.message || 'Cuenta creada con éxito.'} (No. de Cuenta: ${response.data.account.noAccount})`);
-            // Limpiar el formulario después del éxito
-            setForm({
+            setMessage(`Cuenta creada con éxito. Número de Cuenta: ${response.data.account.noAccount}`);
+            setIsSuccessMessage(true); // Es un mensaje de éxito
+            setForm({ // Limpia el formulario solo si es exitoso
                 searchTerm: '',
                 searchType: 'username',
                 amount: '',
@@ -52,7 +53,6 @@ export const CreateAccountForm = () => { // Cambiado el nombre para claridad
         }
     };
 
-    // Opciones de moneda y tipo de cuenta actualizadas
     const monedas = [
         { value: 'USD', label: 'Dólar Estadounidense (USD)' },
         { value: 'EUR', label: 'Euro (EUR)' },
@@ -66,7 +66,7 @@ export const CreateAccountForm = () => { // Cambiado el nombre para claridad
 
     const tiposCuenta = [
         { value: 'Savings', label: 'Cuenta de Ahorros' },
-        { value: 'Monetary', label: 'Cuenta monetaria' }, // Añadido para mayor realismo
+        { value: 'Monetary', label: 'Cuenta monetaria' },
     ];
 
     return (
@@ -75,14 +75,12 @@ export const CreateAccountForm = () => { // Cambiado el nombre para claridad
                 <div className="bg-white rounded-2xl shadow-xl p-8">
                     <div className="text-center mb-8">
                         <div className="flex justify-center mb-4">
-                            {/* Icono o logo aquí */}
                         </div>
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">Apertura de Nueva Cuenta</h1>
                         <p className="text-gray-600">Crear una cuenta para un cliente existente</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Sección para buscar cliente */}
                         <div className="bg-gray-50 rounded-lg p-6">
                             <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
                                 Información del Cliente
@@ -98,7 +96,7 @@ export const CreateAccountForm = () => { // Cambiado el nombre para claridad
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 >
                                     <option value="username">Nombre de Usuario</option>
-                                    <option value="dpi">DPI</option> {/* Corregido a 'dpi' */}
+                                    <option value="dpi">DPI</option>
                                 </select>
                             </div>
                             <div>
@@ -117,7 +115,6 @@ export const CreateAccountForm = () => { // Cambiado el nombre para claridad
                             </div>
                         </div>
 
-                        {/* Sección de información de cuenta */}
                         <div className="bg-gray-50 rounded-lg p-6">
                             <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
                                 Detalles de la Nueva Cuenta
@@ -182,7 +179,7 @@ export const CreateAccountForm = () => { // Cambiado el nombre para claridad
                         <div className="flex justify-center pt-6">
                             <button
                                 type="submit"
-                                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center"
+                                className="bg-[#163a5d] hover:bg-[#164a5d] text-white font-semibold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center"
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
@@ -198,7 +195,7 @@ export const CreateAccountForm = () => { // Cambiado el nombre para claridad
                     </form>
 
                     {message && (
-                        <div className={`mt-6 p-4 rounded-lg text-center ${message.includes('✅') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                        <div className={`mt-6 p-4 rounded-lg text-center ${isSuccessMessage ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                             {message}
                         </div>
                     )}

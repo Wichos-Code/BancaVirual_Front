@@ -15,7 +15,6 @@ export const useCreateAccount = () => {
         toast.error(msg);
         return { error: true, message: msg };
       }
-      toast.success(response.data.msg || "Cuenta agregada con exito");
       return { data: response.data };
     } catch (err) {
       toast.error(err.message);

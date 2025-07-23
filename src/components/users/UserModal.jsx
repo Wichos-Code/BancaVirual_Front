@@ -1,12 +1,8 @@
-// src/components/UserFormModal.jsx
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Spinner } from "../Spinner.jsx";
 
-// Importa los iconos de Heroicons
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"; 
-// Mantén tus otras importaciones si las usas en el mismo archivo:
-// import { UserIcon, UserCircleIcon, CreditCardIcon, EnvelopeIcon, CurrencyDollarIcon, MapPinIcon, PhoneIcon, BuildingOfficeIcon, KeyIcon } from "@heroicons/react/24/outline";
 
 const modalVariants = {
   hidden: { opacity: 0, scale: 0.9 },
@@ -35,7 +31,7 @@ export const UserModal = ({ isOpen, onClose, onSubmit, isLoading, initialData = 
     role: "CLIENT_ROLE",
   });
   const [passwordRequired, setPasswordRequired] = useState(true);
-  const [showPassword, setShowPassword] = useState(false); // Nuevo estado para visibilidad de contraseña
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -44,7 +40,7 @@ export const UserModal = ({ isOpen, onClose, onSubmit, isLoading, initialData = 
         name: initialData.name || "",
         surname: initialData.surname || "",
         email: initialData.email || "",
-        password: "", // Nunca precargar la contraseña para edición
+        password: "",
         dpi: initialData.dpi || "",
         phone: initialData.phone || "",
         direction: initialData.direction || "",
@@ -263,9 +259,9 @@ export const UserModal = ({ isOpen, onClose, onSubmit, isLoading, initialData = 
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
-                        <EyeSlashIcon className="h-5 w-5 text-gray-500" /> // Usar EyeSlashIcon
+                        <EyeSlashIcon className="h-5 w-5 text-gray-500" />
                       ) : (
-                        <EyeIcon className="h-5 w-5 text-gray-500" /> // Usar EyeIcon
+                        <EyeIcon className="h-5 w-5 text-gray-500" />
                       )}
                     </span>
                   </div>

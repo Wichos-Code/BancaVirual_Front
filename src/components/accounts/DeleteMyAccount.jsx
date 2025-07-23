@@ -16,7 +16,7 @@ export const DeleteMyAccount = ({ id, onDeleted }) => {
       <button 
         onClick={handleDelete}
         disabled={isLoading}
-        className="bg-[#1f3a93] hover:bg-[#1f3a93] text-white py-2 px-4 rounded-lg transition-colors duration-300">
+        className="bg-red-600 text-white py-2 px-4 rounded-lg transition-colors duration-300">
         Eliminar
       </button>
     </>

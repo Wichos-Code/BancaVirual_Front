@@ -1,6 +1,5 @@
-// src/shared/hooks/useCreateUser.jsx
 import { useState } from "react";
-import { createUser } from "../../services/api"; // Asegúrate de que esta ruta sea correcta
+import { createUser } from "../../services/api";
 
 export const useCreateUser = () => {
   const [loading, setLoading] = useState(false);
@@ -8,11 +7,10 @@ export const useCreateUser = () => {
 
   const createNewUser = async (userData) => {
     setLoading(true);
-    setError(null); // Resetear cualquier error previo
+    setError(null);
     try {
-      const result = await createUser(userData); // Llama a la función de la API
+      const result = await createUser(userData);
       if (result.error) {
-        // Acceder al mensaje de error del backend si existe, o un mensaje genérico
         const errorMessage = result.e?.response?.data?.message || result.e?.message || "Error desconocido al crear usuario.";
         setError(errorMessage);
         return { success: false, message: errorMessage };
@@ -20,7 +18,6 @@ export const useCreateUser = () => {
         return { success: true, data: result.data };
       }
     } catch (err) {
-      // Para errores inesperados que no son capturados por el `try/catch` de `apiClient`
       const errorMessage = err.message || "Error inesperado al crear usuario.";
       setError(errorMessage);
       return { success: false, message: errorMessage };

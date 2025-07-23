@@ -1,4 +1,3 @@
-// src/components/Auth/VerifyEmail.jsx
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,7 +9,7 @@ export const VerifyEmail = () => {
   const { verify, isLoading } = useVerifyEmail();
 
   const [digits, setDigits] = useState(Array(6).fill(""));
-  const [status, setStatus] = useState("idle"); // 'idle' | 'loading' | 'success' | 'error'
+  const [status, setStatus] = useState("idle");
   const inputsRef = useRef([]);
 
   const handleVerify = useCallback(
@@ -36,7 +35,6 @@ export const VerifyEmail = () => {
         inputsRef.current[idx + 1]?.focus();
       }
 
-      // Auto‑submit when all filled
       if (newDigits.every((d) => d !== "") && status === "idle") {
         setTimeout(() => handleVerify(newDigits.join("")), 100);
       }
@@ -58,14 +56,12 @@ export const VerifyEmail = () => {
     handleVerify(digits.join(""));
   };
 
-  // focus first input on idle
   useEffect(() => {
     if (status === "idle") {
       inputsRef.current[0]?.focus();
     }
   }, [status]);
 
-  // navigate on success
   useEffect(() => {
     if (status === "success") {
       const t = setTimeout(() => navigate("/bancavirtual/acceso"), 2000);

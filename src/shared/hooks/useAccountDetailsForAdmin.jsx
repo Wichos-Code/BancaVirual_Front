@@ -1,39 +1,45 @@
-// src/hooks/useAccountDetailsForAdmin.js
-import { useState, useEffect } from 'react';
-import { getAccountDetailsForAdmin } from '../../services/api'; // Asegúrate de que la ruta sea correcta
+// shared/hooks/useAccountDetailsForAdmin.js
+import { useState, useEffect, useCallback } from 'react';
+import { getAccountDetailsForAdmin } from '../../services/api'; // Asegúrate de que esta ruta sea correcta
 
 export const useAccountDetailsForAdmin = (accountId) => {
     const [accountDetails, setAccountDetails] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        if (!accountId) {
+    const fetchAccountDetails = useCallback(async (idToFetch) => {
+        if (!idToFetch) {
             setAccountDetails(null);
-            setLoading(false);
             setError(null);
+            setLoading(false);
             return;
         }
 
-        const fetchAccountDetails = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                const response = await getAccountDetailsForAdmin(accountId);
-                if (response.error) {
-                    throw new Error(response.e?.response?.data?.message || 'Error al obtener detalles de la cuenta');
-                }
-                setAccountDetails(response.data.accountDetails); // Asume response.data.accountDetails
-            } catch (err) {
-                setError(err.message || 'Error desconocido al cargar los detalles de la cuenta.');
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await getAccountDetailsForAdmin(idToFetch);
+
+            if (response.success) {
+                setAccountDetails(response.data.accountDetails);
+            } else {
+                const errorMessage = response.message || 'Error al obtener detalles de la cuenta.';
+                setError(errorMessage);
                 setAccountDetails(null);
-            } finally {
-                setLoading(false);
             }
-        };
+        } catch (err) {
+            console.error("Excepción en useAccountDetailsForAdmin:", err);
+            setError(err.response?.data?.message || err.message || 'Error desconocido al cargar los detalles de la cuenta.');
+            setAccountDetails(null);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-        fetchAccountDetails();
-    }, [accountId]); // Se re-ejecuta cada vez que accountId cambia
+    useEffect(() => {
+        fetchAccountDetails(accountId);
+    }, [accountId, fetchAccountDetails]);
 
-    return { accountDetails, loading, error };
+    return { accountDetails, loading, error, refetch: fetchAccountDetails };
 };

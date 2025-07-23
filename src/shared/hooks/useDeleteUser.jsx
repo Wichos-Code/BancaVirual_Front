@@ -1,7 +1,5 @@
-// src/shared/hooks/useDeleteUser.jsx
 import { useState } from "react";
-import { deleteUser as deleteUserApi } from "../../services/api"; // Renombrado para evitar conflicto si tuvieras otra función llamada 'deleteUser'
-
+import { deleteUser as deleteUserApi } from "../../services/api";
 export const useDeleteUser = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -10,9 +8,8 @@ export const useDeleteUser = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await deleteUserApi(dpi); // Llama a la función deleteUser de tu API, pasándole el DPI
+      const response = await deleteUserApi(dpi);
       if (response.error) {
-        // Accede a 'message' si tu backend devuelve un objeto de error con esa propiedad
         const errorMessage =
           response.e?.response?.data?.message ||
           response.e?.message ||
@@ -24,7 +21,7 @@ export const useDeleteUser = () => {
       }
     } catch (err) {
       const errorMessage =
-        err.response?.data?.message || // Accede a 'message' si viene en response.data
+        err.response?.data?.message ||
         err.message ||
         "Error inesperado al eliminar el usuario.";
       setError(errorMessage);

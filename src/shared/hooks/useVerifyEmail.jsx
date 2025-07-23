@@ -1,4 +1,3 @@
-// src/shared/hooks/useVerifyEmail.js
 import { useState, useCallback } from "react";
 import { verifyEmail as apiVerifyEmail } from "../../services/api";
 

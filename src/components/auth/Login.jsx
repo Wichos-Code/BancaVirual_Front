@@ -17,14 +17,13 @@ import fondo from "../../assets/img/FondoBF.png";
 export const Login = ({ switchAuthHandler }) => {
   const { login, isLoading } = useLogin();
   const navigate = useNavigate();
-  const [status, setStatus] = useState('base'); // 'base', 'loading', 'success', 'error'
+  const [status, setStatus] = useState('base');
 
   const [form, setForm] = useState({
     identifier: { value: '', isValid: false, showError: false },
     password:   { value: '', isValid: false, showError: false },
   });
 
-  // Efecto para la redirección después de un inicio de sesión exitoso
   useEffect(() => {
     if (status === 'success') {
       const timer = setTimeout(() => {
@@ -41,10 +40,10 @@ export const Login = ({ switchAuthHandler }) => {
             navigate("/");
             break;
         }
-      }, 1200); // Espera para que el usuario vea la animación de éxito
+      }, 1200);
       return () => clearTimeout(timer);
     }
-    // Si hay un error, resetea el formulario después de mostrar el toast
+
     if (status === 'error') {
       const timer = setTimeout(() => setStatus('base'), 1500);
       return () => clearTimeout(timer);
@@ -113,7 +112,7 @@ export const Login = ({ switchAuthHandler }) => {
             </motion.svg>
           </motion.div>
         );
-      default: // 'base' o 'error'
+      default:
         return (
           <motion.div key="form" variants={contentVariants} className="w-full flex flex-col items-center">
             <span className="text-[#163a5d] font-bold text-3xl pb-4">¡Bienvenido de nuevo!</span>

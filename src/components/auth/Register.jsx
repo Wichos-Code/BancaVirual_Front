@@ -97,7 +97,6 @@ export const Register = ({ switchAuthHandler }) => {
       <motion.div variants={formVariants} initial="initial" animate="animate" exit="exit" className="w-full max-w-md mx-auto bg-white rounded-2xl p-8 my-8 flex flex-col items-center space-y-4 shadow-lg">
         <span className="text-[#163a5d] font-bold text-3xl pb-4">Crea tu cuenta</span>
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3">
-          {/* Se mapean los inputs para un código más DRY, aunque dejarlos explícitos también está bien por claridad. Aquí los mantengo explícitos como en tu original. */}
           <Input field="name" value={form.name.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.name.showError} validationMessage={validateNameMessage} type="text" placeholder="Nombres" Icon={UserIcon} />
           <Input field="surname" value={form.surname.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.surname.showError} validationMessage={validateSurnameMessage} type="text" placeholder="Apellidos" Icon={UserIcon} />
           <Input field="username" value={form.username.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.username.showError} validationMessage={validateUsernameMessage} type="text" placeholder="Nombre de usuario" Icon={UserCircleIcon} />

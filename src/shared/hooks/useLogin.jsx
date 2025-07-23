@@ -9,7 +9,6 @@ export const useLogin = () => {
     setIsLoading(true);
     let success = false;
     try {
-      // Simplificamos la creación del payload
       const payload = /^\d+$/.test(identifier)
         ? { dpi: identifier, password }
         : { username: identifier, password };

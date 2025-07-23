@@ -1,5 +1,3 @@
-// src/services/api.jsx
-
 import axios from "axios";
 
 const apiClient = axios.create({
@@ -57,11 +55,6 @@ export const login = async (data) => {
 
 export const addAccount = async (data) => {
   try {
-    // Estas líneas de FormData no son necesarias si tu backend espera JSON directamente
-    // const formData = new FormData();
-    // formData.append("currency", data.currency);
-    // formData.append("type", data.type);
-
     return await apiClient.post("/account/createAccount", data);
   } catch (e) {
     return { error: true, e };
@@ -78,12 +71,6 @@ export const getMyAccounts = async () => {
 
 export const setTransaction = async (data) => {
   try {
-    // Estas líneas de FormData no son necesarias si tu backend espera JSON directamente
-    // const formData = new FormData();
-    // formData.append("fromAccount", data.fromAccount);
-    // formData.append("toAccount", data.toAccount);
-    // formData.append("amount", data.amount);
-
     return await apiClient.post("/account/createTransaction", data);
   } catch (e) {
     console.log(e);
@@ -93,11 +80,6 @@ export const setTransaction = async (data) => {
 
 export const setDeposit = async (data) => {
   try {
-    // Estas líneas de FormData no son necesarias si tu backend espera JSON directamente
-    // const formData = new FormData();
-    // formData.append("account", data.fromAccount);
-    // formData.append("amount", data.amount);
-
     return await apiClient.post("/account/createDeposit", data);
   } catch (e) {
     console.log(e);
@@ -138,11 +120,8 @@ export const setFavoriteAccount = async (data) => {
   }
 }
 
-// FUNCIONES PARA LA GESTIÓN DE USUARIOS (EXISTENTES Y LAS NUEVAS)
-
 export const getUsers = async () => {
   try {
-    // Tu backend devuelve /user/users
     const response = await apiClient.get("/user/users");
     console.log("Respuesta de la API /user/users:", response.data);
     return response;
@@ -154,7 +133,6 @@ export const getUsers = async () => {
 
 export const deleteUser = async (dpi) => {
   try {
-    // Tu backend devuelve /user/delete/:dpi
     return await apiClient.delete(`/user/delete/${dpi}`);
   } catch (e) {
     console.log(e);
@@ -162,10 +140,8 @@ export const deleteUser = async (dpi) => {
   }
 };
 
-// ¡NUEVAS FUNCIONES AGREGADAS!
 export const createUser = async (data) => {
   try {
-    // La ruta en tu backend es /user/createUser
     const response = await apiClient.post("/user/createUser", data);
     console.log("Respuesta de la API /user/createUser:", response.data);
     return { success: true, data: response.data };
@@ -177,7 +153,6 @@ export const createUser = async (data) => {
 
 export const updateUser = async (dpi, data) => {
   try {
-    // La ruta en tu backend es /user/update/:dpi
     const response = await apiClient.put(`/user/update/${dpi}`, data);
     console.log(`Respuesta de la API /user/update/${dpi}:`, response.data);
     return { success: true, data: response.data };
@@ -187,31 +162,47 @@ export const updateUser = async (dpi, data) => {
   }
 };
 
-// --- NUEVAS FUNCIONES PARA ADMINISTRADORES (CUMPLIDAS ANTERIORMENTE) ---
-
 export const getMostActiveAccounts = async () => {
   try {
-    return await apiClient.get("/account/admin/mostActiveAccounts");
+      const response = await apiClient.get("/account/admin/mostActiveAccounts");
+      // Asume que el backend devuelve { success: true, accounts: [...] }
+      return { success: true, data: response.data }; // Devuelve la data completa
   } catch (e) {
-    console.error("Error fetching most active accounts:", e);
+      console.error("Error fetching most active accounts:", e);
+      return { error: true, e };
+  }
+};
+
+export const getAllAccounts = async () => {
+  try {
+    const response = await apiClient.get("/account/getAllAccounts");
+    // response.data = { success: true, accounts: [...] }
+    return { success: true, data: response.data.accounts };
+  } catch (e) {
+    console.error("Error fetching all accounts:", e);
     return { error: true, e };
   }
 };
 
 export const getAccountDetailsForAdmin = async (accountId) => {
   try {
-    return await apiClient.get(`/account/admin/accountDetails/${accountId}`);
+      const response = await apiClient.get(`/account/admin/accountDetails/${accountId}`);
+      // Asume que el backend devuelve { success: true, accountDetails: {...} }
+      return { success: true, data: response.data }; // Devuelve la data completa
   } catch (e) {
-    console.error(`Error fetching account details for account ${accountId}:`, e);
-    return { error: true, e };
+      console.error(`Error fetching account details for account ${accountId}:`, e);
+      console.error(e)
+      return { error: true, e };
   }
 };
 
 export const reverseDeposit = async (transactionId) => {
   try {
-    return await apiClient.post("/account/admin/reverseDeposit", { transactionId });
+      const response = await apiClient.post("/account/admin/reverseDeposit", { transactionId });
+      // Asume que el backend devuelve { success: true, message: "...", reversalDetails: {...}, updatedAccountBalance: ... }
+      return { success: true, data: response.data }; // Devuelve la data completa
   } catch (e) {
-    console.error(`Error reversing deposit transaction ${transactionId}:`, e);
-    return { error: true, e };
+      console.error(`Error reversing deposit transaction ${transactionId}:`, e);
+      return { error: true, e };
   }
 };

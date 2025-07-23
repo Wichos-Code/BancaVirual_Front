@@ -1,50 +1,77 @@
-// src/pages/CuentasAdminPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useMostActiveAccounts } from '../../shared/hooks/useMostActiveAccounts';
 import { useAccountDetailsForAdmin } from '../../shared/hooks/useAccountDetailsForAdmin';
 import { useReverseDeposit } from '../../shared/hooks/useReverseDeposit';
-import { getUsers } from '../../services/api'; // Importamos getUsers para buscar usuarios por DPI/username
+import { getUsers } from '../../services/api';
 
-// --- Componente para mostrar Cuentas Más Activas ---
+const formatCurrency = (amount, currency = 'GTQ') => {
+    return new Intl.NumberFormat('es-GT', {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(amount);
+};
+
 const MostActiveAccountsDisplay = () => {
-    const { accounts, loading, error } = useMostActiveAccounts();
+    const { accounts, loading, error, refetch } = useMostActiveAccounts();
 
     if (loading) return (
-        <div className="card shadow-sm p-3 mb-4 text-center">
-            <div className="spinner-border text-primary" role="status">
+        <div className="flex items-center justify-center p-6 mb-4 bg-white rounded-xl shadow-md">
+            <div className="spinner-border text-blue-500 animate-spin mr-3" role="status">
                 <span className="visually-hidden">Cargando...</span>
             </div>
-            <p className="mt-2 text-muted">Cargando cuentas con más movimientos...</p>
+            <p className="text-gray-600">Cargando cuentas con más movimientos...</p>
         </div>
     );
-    if (error) return <div className="alert alert-danger" role="alert">Error al cargar cuentas activas: {error}</div>;
-    if (!accounts || accounts.length === 0) return <div className="alert alert-info" role="alert">No hay cuentas con movimientos para mostrar.</div>;
+    if (error) return (
+        <div className="p-4 mb-4 text-red-700 bg-red-100 rounded-lg shadow-md flex items-center">
+            <i className="bi bi-exclamation-triangle-fill mr-2"></i>
+            <span>Error al cargar cuentas activas: {error}</span>
+        </div>
+    );
+    if (!accounts || accounts.length === 0) return (
+        <div className="p-4 mb-4 text-blue-700 bg-blue-100 rounded-lg shadow-md flex items-center">
+            <i className="bi bi-info-circle-fill mr-2"></i>
+            <span>No hay cuentas con movimientos para mostrar.</span>
+        </div>
+    );
 
     return (
-        <div className="card shadow-sm p-4 mb-4 bg-white rounded">
-            <h3 className="card-title text-primary mb-3">
-                <i className="bi bi-graph-up me-2"></i> Cuentas con Más Movimientos
+        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+            <h3 className="text-2xl font-bold text-blue-700 mb-4 flex items-center">
+                <i className="bi bi-graph-up mr-3"></i> Cuentas con Más Movimientos
             </h3>
-            <p className="card-subtitle text-muted mb-4">Estas son las cuentas con mayor actividad transaccional.</p>
-            <div className="table-responsive">
-                <table className="table table-hover table-striped">
-                    <thead className="table-dark">
+            <p className="text-gray-600 mb-6">Estas son las cuentas con mayor actividad transaccional.</p>
+            <div className="overflow-x-auto">
+                <table className="min-w-full bg-white rounded-lg overflow-hidden">
+                    <thead className="bg-blue-600 text-white">
                         <tr>
-                            <th>No. Cuenta</th>
-                            <th>Propietario</th>
-                            <th>Movimiento Total</th>
-                            <th>Saldo Actual</th>
-                            <th>Moneda</th>
+                            <th className="py-3 px-4 text-left text-sm font-semibold rounded-tl-lg">No. Cuenta</th>
+                            <th className="py-3 px-4 text-left text-sm font-semibold">Propietario</th>
+                            <th className="py-3 px-4 text-left text-sm font-semibold">Movimiento Total</th>
+                            <th className="py-3 px-4 text-left text-sm font-semibold">Saldo Actual</th>
+                            <th className="py-3 px-4 text-left text-sm font-semibold rounded-tr-lg">Moneda</th>
                         </tr>
                     </thead>
                     <tbody>
                         {accounts.map((account) => (
-                            <tr key={account.noAccount}>
-                                <td><span className="badge bg-secondary">{account.noAccount}</span></td>
-                                <td>{account.ownerName} (<small className="text-muted">{account.ownerUsername}</small>)</td>
-                                <td><span className="fw-bold text-success">{account.totalMovement.toFixed(2)}</span></td>
-                                <td>{account.currentBalance.toFixed(2)}</td>
-                                <td>{account.currency}</td>
+                            <tr key={account.noAccount} className="border-b border-gray-200 hover:bg-gray-50">
+                                <td className="py-3 px-4 text-sm text-gray-800">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        {account.noAccount}
+                                    </span>
+                                </td>
+                                <td className="py-3 px-4 text-sm text-gray-800">
+                                    {account.ownerName} (<span className="text-gray-500 text-xs">{account.ownerUsername}</span>)
+                                </td>
+                                <td className="py-3 px-4 text-sm text-green-600 font-semibold">
+                                    {formatCurrency(account.totalMovement, account.currency)}
+                                </td>
+                                <td className="py-3 px-4 text-sm text-gray-800">
+                                    {formatCurrency(account.currentBalance, account.currency)}
+                                </td>
+                                <td className="py-3 px-4 text-sm text-gray-800">{account.currency}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -54,43 +81,43 @@ const MostActiveAccountsDisplay = () => {
     );
 };
 
-// --- Componente para buscar y mostrar Detalles de Cuenta ---
 const AccountDetailsSearch = () => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [searchType, setSearchType] = useState('accountId'); // 'accountId', 'dpi', 'username'
+    const [searchType, setSearchType] = useState('accountId');
     const [selectedAccountId, setSelectedAccountId] = useState(null);
-    const [userAccounts, setUserAccounts] = useState([]); // Para guardar las cuentas de un usuario encontrado
+    const [userAccounts, setUserAccounts] = useState([]);
     const [searchFeedback, setSearchFeedback] = useState('');
+    const [isSearchingUsers, setIsSearchingUsers] = useState(false);
 
-    const { accountDetails, loading, error } = useAccountDetailsForAdmin(selectedAccountId);
+    const { accountDetails, loading: detailsLoading, error: detailsError, refetch: refetchAccountDetails } = useAccountDetailsForAdmin(selectedAccountId);
 
-    const handleSearch = async () => {
-        setSearchFeedback('');
-        setSelectedAccountId(null); // Resetear el ID de cuenta seleccionada
-        setUserAccounts([]); // Resetear las cuentas del usuario
 
-        if (!searchTerm.trim()) {
-            setSearchFeedback('Por favor, ingresa un término de búsqueda.');
-            return;
-        }
 
-        if (searchType === 'accountId') {
-            setSelectedAccountId(searchTerm.trim());
-        } else {
-            // Lógica para buscar por DPI o Username
-            try {
-                // Asumo que getUsers() devuelve una lista de usuarios y podemos filtrar en el frontend
-                // O idealmente, tendrías una ruta en el backend para buscar usuarios por DPI/username.
-                // Si no tienes una ruta específica, esta es una forma de hacerlo (menos eficiente para muchos usuarios)
-                const response = await getUsers();
-                if (response.error) {
-                    throw new Error(response.e?.response?.data?.message || 'Error al obtener usuarios');
-                }
-                const users = response.data.users; // Asumo que response.data.users contiene la lista de usuarios
+const handleSearch = async () => {
+    setSearchFeedback('');
+    setSelectedAccountId(null);
+    setUserAccounts([]);
+
+    if (!searchTerm.trim()) {
+        setSearchFeedback('Por favor, ingresa un término de búsqueda.');
+        return;
+    }
+
+    if (searchType === 'accountId') {
+        setSelectedAccountId(searchTerm.trim());
+    } else {
+        setIsSearchingUsers(true);
+        try {
+            const apiResponseAxios = await getUsers();
+            const apiResponseData = apiResponseAxios.data;
+
+
+            if (apiResponseData && apiResponseData.message === 'Usuarios obtenidos con exito' && Array.isArray(apiResponseData.user)) {
+                const users = apiResponseData.user;
 
                 let foundUser = null;
                 if (searchType === 'dpi') {
-                    foundUser = users.find(u => u.DPI === searchTerm.trim());
+                    foundUser = users.find(u => String(u.dpi) === searchTerm.trim());
                 } else if (searchType === 'username') {
                     foundUser = users.find(u => u.username === searchTerm.trim());
                 }
@@ -105,35 +132,51 @@ const AccountDetailsSearch = () => {
                 } else {
                     setSearchFeedback(`No se encontró ningún usuario con el ${searchType} '${searchTerm}'.`);
                 }
-
-            } catch (err) {
-                setSearchFeedback(`Error al buscar usuario: ${err.message}`);
-                console.error("Error al buscar usuario por DPI/username:", err);
+            } else {
+                throw new Error(apiResponseData.message || 'La API no devolvió una lista de usuarios válida o con el formato esperado.');
             }
+
+        } catch (err) {
+            setSearchFeedback(`Error al buscar usuario: ${err.message}`);
+            console.error("Error al buscar usuario por DPI/username:", err);
+        } finally {
+            setIsSearchingUsers(false);
         }
-    };
+    }
+};
 
     const handleSelectAccount = (accountId) => {
         setSelectedAccountId(accountId);
-        setUserAccounts([]); // Ocultar la lista de cuentas una vez que se selecciona una
+        setUserAccounts([]);
+        setSearchFeedback('');
+    };
+
+    const copyToClipboard = (text) => {
+        navigator.clipboard.writeText(text).then(() => {
+            setSearchFeedback('ID de transacción copiado al portapapeles!');
+            setTimeout(() => setSearchFeedback(''), 2000);
+        }).catch(err => {
+            console.error('Error al copiar al portapapeles:', err);
+            setSearchFeedback('Error al copiar el ID.');
+        });
     };
 
     return (
-        <div className="card shadow-sm p-4 mb-4 bg-white rounded">
-            <h3 className="card-title text-primary mb-3">
-                <i className="bi bi-search me-2"></i> Buscar Detalles de Cuenta
+        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+            <h3 className="text-2xl font-bold text-blue-700 mb-4 flex items-center">
+                <i className="bi bi-search mr-3"></i> Buscar Detalles de Cuenta
             </h3>
-            <p className="card-subtitle text-muted mb-3">Busca por ID de cuenta, DPI o nombre de usuario del propietario.</p>
+            <p className="text-gray-600 mb-6">Busca por ID de cuenta, DPI o nombre de usuario del propietario.</p>
 
-            <div className="input-group mb-3">
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
                 <select
-                    className="form-select"
+                    className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={searchType}
                     onChange={(e) => {
                         setSearchType(e.target.value);
-                        setSearchTerm(''); // Limpiar término al cambiar tipo de búsqueda
-                        setSelectedAccountId(null); // Resetear cuenta seleccionada
-                        setUserAccounts([]); // Resetear cuentas de usuario
+                        setSearchTerm('');
+                        setSelectedAccountId(null);
+                        setUserAccounts([]);
                         setSearchFeedback('');
                     }}
                 >
@@ -143,34 +186,58 @@ const AccountDetailsSearch = () => {
                 </select>
                 <input
                     type="text"
-                    className="form-control"
+                    className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder={`Ingresa el ${searchType === 'accountId' ? 'ID de la cuenta' : searchType === 'dpi' ? 'DPI del usuario' : 'nombre de usuario'}`}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <button
-                    className="btn btn-primary"
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
                     onClick={handleSearch}
-                    disabled={!searchTerm.trim()}
+                    disabled={!searchTerm.trim() || isSearchingUsers || detailsLoading}
                 >
-                    <i className="bi bi-search me-1"></i> Buscar
+                    {(isSearchingUsers || (searchType === 'accountId' && detailsLoading)) ? (
+                        <>
+                            <div className="spinner-border spinner-border-sm mr-2" role="status">
+                                <span className="visually-hidden">Cargando...</span>
+                            </div>
+                            Buscando...
+                        </>
+                    ) : (
+                        <>
+                            <i className="bi bi-search mr-2"></i> Buscar
+                        </>
+                    )}
                 </button>
             </div>
 
             {searchFeedback && (
-                <div className={`alert ${searchFeedback.includes('Error') || searchFeedback.includes('No se encontró') ? 'alert-warning' : 'alert-info'} mt-2`}>
+                <div className={`p-3 rounded-lg text-sm mb-4 ${searchFeedback.includes('Error') || searchFeedback.includes('No se encontró') || searchFeedback.includes('no tiene cuentas') ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>
                     {searchFeedback}
                 </div>
             )}
 
+            {isSearchingUsers && searchType !== 'accountId' && (
+                <div className="flex items-center justify-center p-6 mt-4 bg-white rounded-xl shadow-md">
+                    <div className="spinner-border text-blue-500 animate-spin mr-3" role="status">
+                        <span className="visually-hidden">Cargando usuarios...</span>
+                    </div>
+                    <p className="text-gray-600">Buscando usuarios...</p>
+                </div>
+            )}
+
             {userAccounts.length > 0 && (
-                <div className="mt-3 card card-body bg-light">
-                    <h5>Cuentas del Usuario Encontrado:</h5>
-                    <ul className="list-group">
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg shadow-inner">
+                    <h5 className="text-lg font-semibold text-gray-800 mb-3">Cuentas del Usuario Encontrado:</h5>
+                    <ul className="space-y-2">
                         {userAccounts.map(acc => (
-                            <li key={acc._id} className="list-group-item d-flex justify-content-between align-items-center">
-                                No. Cuenta: {acc.noAccount} ({acc.currency})
-                                <button className="btn btn-sm btn-outline-info" onClick={() => handleSelectAccount(acc._id)}>
+
+                            <li key={acc._id} className="flex justify-between items-center p-3 bg-white rounded-md shadow-sm border border-gray-200">
+                                <span className="font-mono text-sm text-gray-700">No. Cuenta: {acc.noAccount} ({acc.currency})</span>
+                                <button
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-colors duration-200"
+                                    onClick={() => handleSelectAccount(acc._id)}
+                                >
                                     Ver Detalles
                                 </button>
                             </li>
@@ -179,64 +246,88 @@ const AccountDetailsSearch = () => {
                 </div>
             )}
 
-            {loading && selectedAccountId && (
-                <div className="text-center mt-3">
-                    <div className="spinner-border text-info" role="status">
+            {detailsLoading && selectedAccountId && (
+                <div className="flex items-center justify-center p-6 mt-4 bg-white rounded-xl shadow-md">
+                    <div className="spinner-border text-blue-500 animate-spin mr-3" role="status">
                         <span className="visually-hidden">Cargando detalles...</span>
                     </div>
-                    <p className="mt-2 text-muted">Cargando detalles de la cuenta...</p>
+                    <p className="text-gray-600">Cargando detalles de la cuenta...</p>
                 </div>
             )}
-            {error && selectedAccountId && <div className="alert alert-danger mt-3" role="alert">Error al cargar detalles: {error}</div>}
+            {detailsError && selectedAccountId && (
+                <div className="p-4 mt-4 text-red-700 bg-red-100 rounded-lg shadow-md flex items-center">
+                    <i className="bi bi-exclamation-triangle-fill mr-2"></i>
+                    <span>Error al cargar detalles: {detailsError}</span>
+                </div>
+            )}
 
             {accountDetails && (
-                <div className="mt-4 p-3 border rounded shadow-sm bg-light">
-                    <h4 className="text-secondary mb-3">
-                        <i className="bi bi-info-circle me-2"></i> Detalles de la Cuenta: <span className="text-dark fw-bold">{accountDetails.noAccount}</span>
+                <div className="mt-6 p-6 border border-gray-200 rounded-xl shadow-lg bg-gray-50">
+                    <h4 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i className="bi bi-info-circle mr-2 text-blue-600"></i> Detalles de la Cuenta: <span className="text-blue-700 ml-2">{accountDetails.noAccount}</span>
                     </h4>
-                    <ul className="list-group list-group-flush mb-3">
-                        <li className="list-group-item"><strong>Propietario:</strong> {accountDetails.user?.name} (Usuario: {accountDetails.user?.username})</li>
-                        <li className="list-group-item"><strong>Email Propietario:</strong> {accountDetails.user?.email}</li>
-                        <li className="list-group-item"><strong>Saldo Actual:</strong> <span className="text-success fw-bold">{accountDetails.amount.toFixed(2)} {accountDetails.currency}</span></li>
-                        <li className="list-group-item"><strong>Tipo de Cuenta:</strong> {accountDetails.type}</li>
-                        <li className="list-group-item"><strong>Estado:</strong> <span className={`badge bg-${accountDetails.status ? 'success' : 'danger'}`}>{accountDetails.status ? 'Activa' : 'Inactiva'}</span></li>
-                        <li className="list-group-item"><strong>Fecha Creación:</strong> {new Date(accountDetails.createdAt).toLocaleString()}</li>
+                    <ul className="space-y-2 text-gray-700">
+                        <li className="flex justify-between items-center py-2 border-b border-gray-200">
+                            <strong className="flex items-center"><i className="bi bi-person-fill mr-2 text-gray-500"></i>Propietario:</strong>
+                            <span>{accountDetails.user?.name} (Usuario: {accountDetails.user?.username})</span>
+                        </li>
+                        <li className="flex justify-between items-center py-2 border-b border-gray-200">
+                            <strong className="flex items-center"><i className="bi bi-envelope-fill mr-2 text-gray-500"></i>Email Propietario:</strong>
+                            <span>{accountDetails.user?.email}</span>
+                        </li>
+                        <li className="flex justify-between items-center py-2 border-b border-gray-200">
+                            <strong className="flex items-center"><i className="bi bi-currency-dollar mr-2 text-gray-500"></i>Saldo Actual:</strong>
+                            <span className="text-green-600 font-bold">{formatCurrency(accountDetails.amount, accountDetails.currency)}</span>
+                        </li>
+                        <li className="flex justify-between items-center py-2 border-b border-gray-200">
+                            <strong className="flex items-center">Tipo de Cuenta:</strong>
+                            <span>{accountDetails.type}</span>
+                        </li>
+                        <li className="flex justify-between items-center py-2 border-b border-gray-200">
+                            <strong className="flex items-center">Estado:</strong>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${accountDetails.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                {accountDetails.status ? 'Activa' : 'Inactiva'}
+                            </span>
+                        </li>
+                        <li className="flex justify-between items-center py-2">
+                            <strong className="flex items-center">Fecha Creación:</strong>
+                            <span>{new Date(accountDetails.createdAt).toLocaleString()}</span>
+                        </li>
                     </ul>
 
-                    <h5 className="mt-4 text-secondary">
-                        <i className="bi bi-clock-history me-2"></i> Últimos 5 Movimientos:
+                    <h5 className="mt-6 text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i className="bi bi-clock-history mr-2 text-blue-600"></i> Últimos 5 Movimientos:
                     </h5>
                     {accountDetails.last5Movements && accountDetails.last5Movements.length > 0 ? (
-                        <ul className="list-group">
+                        <ul className="space-y-3">
                             {accountDetails.last5Movements.map((transaction) => (
-                                <li key={transaction._id} className="list-group-item d-flex justify-content-between align-items-center">
+                
+                                <li key={transaction._id} className="p-4 bg-white rounded-md shadow-sm border border-gray-200 flex justify-between items-center">
                                     <div>
-                                        <strong>{transaction.type}:</strong> <span className={`fw-bold ${transaction.type === 'DEPOSIT' || (transaction.toAccount === accountDetails.noAccount && transaction.type === 'TRANSFER') ? 'text-success' : 'text-danger'}`}>{transaction.amount.toFixed(2)} {transaction.currency}</span>
+                                        <strong className="text-gray-900">{transaction.type}:</strong>{' '}
+                                        <span className={`font-bold ${transaction.type === 'DEPOSIT' || (transaction.toAccount === accountDetails.noAccount && transaction.type === 'TRANSFER') ? 'text-green-600' : 'text-red-600'}`}>
+                                            {formatCurrency(transaction.amount, transaction.currency)}
+                                        </span>
                                         <br />
-                                        <small className="text-muted">{new Date(transaction.createdAt).toLocaleString()}</small>
+                                        <small className="text-gray-500">{new Date(transaction.createdAt).toLocaleString()}</small>
                                         <br />
-                                        {transaction.fromAccount && <small>Origen: {transaction.fromAccount}</small>}
-                                        {transaction.toAccount && <small> Destino: {transaction.toAccount}</small>}
+                                        {transaction.fromAccount && <small className="text-gray-600">Origen: {transaction.fromAccount}</small>}
+                                        {transaction.toAccount && <small className="text-gray-600"> Destino: {transaction.toAccount}</small>}
                                     </div>
                                     {transaction.type === 'DEPOSIT' && (
                                         <button
-                                            className="btn btn-sm btn-outline-warning"
-                                            title="Revertir Depósito"
-                                            onClick={() => { /* Lógica para pasar el ID a ReverseDepositTool */
-                                                 // Aquí podrías usar un contexto o pasar una prop para comunicar al ReverseDepositTool
-                                                 // Por simplicidad, podríamos directamente llamar a la API si fuera un caso aislado,
-                                                 // pero lo ideal es que el ReversDepositTool sea un componente aparte que gestione su propia UI.
-                                                 alert(`Puedes usar el ID de esta transacción (${transaction._id}) en la sección de "Revertir Depósito".`);
-                                            }}
+                                            className="px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm hover:bg-yellow-600 transition-colors duration-200 flex items-center"
+                                            title="Copiar ID para Revertir Depósito"
+                                            onClick={() => copyToClipboard(transaction._id)}
                                         >
-                                            <i className="bi bi-arrow-counterclockwise"></i>
+                                            <i className="bi bi-clipboard mr-1"></i> Copiar ID
                                         </button>
                                     )}
                                 </li>
                             ))}
                         </ul>
                     ) : (
-                        <div className="alert alert-light text-center mt-3">No hay movimientos recientes para esta cuenta.</div>
+                        <div className="p-4 text-gray-700 bg-gray-100 rounded-lg text-center">No hay movimientos recientes para esta cuenta.</div>
                     )}
                 </div>
             )}
@@ -244,8 +335,7 @@ const AccountDetailsSearch = () => {
     );
 };
 
-// --- Componente para Revertir Depósito ---
-const ReverseDepositTool = () => {
+const ReverseDepositTool = ({ onDepositReversed }) => {
     const [transactionId, setTransactionId] = useState('');
     const [feedbackMessage, setFeedbackMessage] = useState('');
     const { triggerReverseDeposit, isLoading, error, isSuccess, reversalResult } = useReverseDeposit();
@@ -259,91 +349,78 @@ const ReverseDepositTool = () => {
 
         const result = await triggerReverseDeposit(transactionId);
         if (result.success) {
-            setFeedbackMessage('✅ Depósito revertido exitosamente! Nuevo saldo: ' + result.data.updatedAccountBalance.toFixed(2) + ' ' + result.data.currency);
-            setTransactionId(''); // Limpiar campo
+            setFeedbackMessage(`Depósito revertido exitosamente! Nuevo saldo: ${formatCurrency(result.data.updatedAccountBalance, result.data.currency)}`);
+            setTransactionId('');
+            if (onDepositReversed) {
+                onDepositReversed();
+            }
         } else {
-            setFeedbackMessage(`❌ Error al revertir: ${result.error || 'Desconocido'}`);
+            setFeedbackMessage(`Error al revertir: ${result.message || 'Desconocido'}`);
         }
     };
 
     return (
-        <div className="card shadow-sm p-4 bg-white rounded">
-            <h3 className="card-title text-primary mb-3">
-                <i className="bi bi-arrow-counterclockwise me-2"></i> Revertir Depósito
+        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+            <h3 className="text-2xl font-bold text-blue-700 mb-4 flex items-center">
+                <i className="bi bi-arrow-counterclockwise mr-3"></i> Revertir Depósito
             </h3>
-            <p className="card-subtitle text-muted mb-3">Ingresa el ID de una transacción de depósito para revertirla (solo si no ha pasado más de 1 minuto).</p>
-            <div className="input-group mb-3">
+            <p className="text-gray-600 mb-6">Ingresa el ID de una transacción de depósito para revertirla (solo si no ha pasado más de 1 minuto).</p>
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
                 <input
                     type="text"
-                    className="form-control"
+                    className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="ID de la Transacción de Depósito"
                     value={transactionId}
                     onChange={(e) => setTransactionId(e.target.value)}
                 />
                 <button
-                    className="btn btn-warning"
+                    className="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
                     onClick={handleReverse}
                     disabled={isLoading || !transactionId.trim()}
                 >
                     {isLoading ? (
                         <>
-                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <div className="spinner-border spinner-border-sm mr-2" role="status">
+                                <span className="visually-hidden">Revirtiendo...</span>
+                            </div>
                             Revirtiendo...
                         </>
                     ) : (
                         <>
-                            <i className="bi bi-arrow-counterclockwise me-1"></i> Revertir Depósito
+                            <i className="bi bi-arrow-counterclockwise mr-2"></i> Revertir Depósito
                         </>
                     )}
                 </button>
             </div>
             {feedbackMessage && (
-                <div className={`alert ${isSuccess ? 'alert-success' : 'alert-danger'} mt-2`}>
+                <div className={`p-3 rounded-lg text-sm ${isSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {feedbackMessage}
                 </div>
             )}
-            {error && <div className="alert alert-danger mt-2" role="alert">Error del sistema: {error}</div>}
+            {error && <div className="p-3 text-red-700 bg-red-100 rounded-lg text-sm mt-2">Error del sistema: {error}</div>}
         </div>
     );
 };
 
-// --- Componente principal de la página de Cuentas del Admin ---
 export const AdminPage = () => {
-    // Puedes añadir lógica para verificar el rol aquí si no lo haces en el router
-    // const userDetails = JSON.parse(localStorage.getItem('user'));
-    // const userRole = userDetails?.user?.role;
-    // if (userRole !== "ADMIN_ROLE" && userRole !== "SUPERVISOR_ROLE") {
-    //     return <p className="alert alert-danger">Acceso denegado. No tienes permisos para ver esta página.</p>;
-    // }
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const handleDepositReversed = useCallback(() => {
+        setRefreshKey(prevKey => prevKey + 1);
+    }, []);
 
     return (
-        <div className="container mt-5">
-            <h1 className="mb-4 text-center text-primary fw-bold">
-                <i className="bi bi-bank me-3"></i> Gestión de Cuentas Bancarias
+        <div className="min-h-screen p-6 sm:p-10 font-sans">
+            <h1 className="text-4xl font-extrabold text-white mb-6 text-center flex items-center justify-center">
+                <i className="bi bi-bank mr-4 text-white"></i> Gestión de Cuentas Bancarias
             </h1>
-            <p className="lead text-center text-muted mb-5">
+            <p className="text-lg text-white mb-10 text-center max-w-3xl mx-auto">
                 Desde aquí, como administrador, puedes supervisar y gestionar las cuentas de los usuarios de manera eficiente.
             </p>
 
-            <div className="row">
-                <div className="col-md-12">
-                    <MostActiveAccountsDisplay />
-                </div>
+            <div className="grid grid-cols-1 gap-6">
+                <MostActiveAccountsDisplay key={`most-active-${refreshKey}`} />
             </div>
-
-            <div className="row mt-4">
-                <div className="col-md-12">
-                    <AccountDetailsSearch />
-                </div>
-            </div>
-
-            <div className="row mt-4">
-                <div className="col-md-12">
-                    <ReverseDepositTool />
-                </div>
-            </div>
-
-            {/* Puedes agregar más componentes o secciones aquí si es necesario */}
         </div>
     );
 };

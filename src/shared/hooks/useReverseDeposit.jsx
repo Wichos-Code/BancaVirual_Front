@@ -1,6 +1,6 @@
-// src/hooks/useReverseDeposit.js
+// shared/hooks/useReverseDeposit.js
 import { useState, useCallback } from 'react';
-import { reverseDeposit } from '../../services/api'; // Asegúrate de que la ruta sea correcta
+import { reverseDeposit } from '../../services/api'; // Asegúrate de que esta ruta sea correcta
 
 export const useReverseDeposit = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -17,19 +17,38 @@ export const useReverseDeposit = () => {
         try {
             const response = await reverseDeposit(transactionId);
             if (response.error) {
-                throw new Error(response.e?.response?.data?.message || 'Error al revertir el depósito.');
+                const errorMessage = response.e?.response?.data?.message || response.e?.message || 'Error al revertir el depósito.';
+                setError(errorMessage);
+                setIsSuccess(false);
+                return { success: false, message: errorMessage }; // Devolver un mensaje claro
+            } else if (response.data && response.data.success) {
+                setIsSuccess(true);
+                setReversalResult(response.data);
+                // Asumiendo que el backend devuelve updatedAccountBalance y currency en reversalDetails
+                return {
+                    success: true,
+                    message: response.data.message || 'Depósito revertido exitosamente.',
+                    data: {
+                        updatedAccountBalance: response.data.updatedAccountBalance, // Asegúrate que el backend lo envíe
+                        currency: response.data.reversalDetails?.currency // O de donde venga la moneda
+                    }
+                };
+            } else {
+                const errorMessage = response.data?.message || 'Respuesta inesperada al revertir el depósito.';
+                setError(errorMessage);
+                setIsSuccess(false);
+                return { success: false, message: errorMessage };
             }
-            setIsSuccess(true);
-            setReversalResult(response.data); // Asume que la respuesta tiene response.data
-            return { success: true, data: response.data };
         } catch (err) {
-            setError(err.message || 'Error desconocido al revertir el depósito.');
+            console.error("Excepción en useReverseDeposit:", err);
+            const errorMessage = err.message || 'Error desconocido al revertir el depósito.';
+            setError(errorMessage);
             setIsSuccess(false);
-            return { success: false, error: err.message };
+            return { success: false, message: errorMessage };
         } finally {
             setIsLoading(false);
         }
-    }, []); // La función no depende de ningún estado, por lo que useCallback está bien aquí
+    }, []);
 
     return { triggerReverseDeposit, isLoading, error, isSuccess, reversalResult };
 };

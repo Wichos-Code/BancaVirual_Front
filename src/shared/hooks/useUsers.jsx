@@ -1,6 +1,5 @@
-// src/shared/hooks/useUsers.jsx
 import { useState, useEffect, useCallback } from "react";
-import { getUsers } from "../../services/api"; // Asegúrate de que esta ruta sea correcta
+import { getUsers } from "../../services/api";
 
 export const useUsers = () => {
   const [users, setUsers] = useState([]);
@@ -20,14 +19,13 @@ export const useUsers = () => {
         setTotal(0);
         console.error("Error al cargar usuarios en hook:", errorMessage);
       } else {
-        // CAMBIO AQUÍ: Acceder a 'response.data.user' en lugar de 'response.data.users'
-        const fetchedUsers = response.data.user || []; // Ahora apunta a la propiedad correcta
-        const fetchedTotal = response.data.total || fetchedUsers.length; // Si tu API no devuelve un total, usará la longitud del array
+        const fetchedUsers = response.data.user || [];
+        const fetchedTotal = response.data.total || fetchedUsers.length;
 
         setUsers(fetchedUsers);
         setTotal(fetchedTotal);
-        console.log("Usuarios cargados en hook (después de corrección):", fetchedUsers); // Actualiza el log
-        console.log("Total de usuarios en hook (después de corrección):", fetchedTotal); // Actualiza el log
+        console.log("Usuarios cargados en hook (después de corrección):", fetchedUsers);
+        console.log("Total de usuarios en hook (después de corrección):", fetchedTotal);
       }
     } catch (err) {
       const errorMessage = err.message || "Error inesperado al cargar usuarios.";

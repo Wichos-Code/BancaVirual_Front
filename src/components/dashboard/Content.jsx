@@ -24,24 +24,34 @@ export function Content() {
   const getActiveSection = () => {
     const currentPath = location.pathname;
 
+    if (currentPath.startsWith("/bancavirtual/my-favorites")) {
+      return "myaccounts";
+    }
+    if (currentPath.startsWith(SECTIONS.myaccounts)) {
+      return "myaccounts";
+    }
+
     for (const key in SECTIONS) {
       if (currentPath === SECTIONS[key]) {
         return key;
       }
     }
-
+    
     let longestMatchKey = "";
     let longestMatchPathLength = 0;
 
-    for (const key in SECTIONS) {
-      if (currentPath.startsWith(SECTIONS[key])) {
-        if (SECTIONS[key].length > longestMatchPathLength) {
-          longestMatchPathLength = SECTIONS[key].length;
-          longestMatchKey = key;
+
+    const sortedKeys = Object.keys(SECTIONS).sort((a, b) => 
+        SECTIONS[b].length - SECTIONS[a].length
+    );
+
+    for (const key of sortedKeys) {
+        if (currentPath.startsWith(SECTIONS[key])) {
+            return key;
         }
-      }
     }
-    return longestMatchKey;
+
+    return "";
   };
 
   const activeSection = getActiveSection();
@@ -51,7 +61,6 @@ export function Content() {
     if (destination) {
       navigate(destination);
     }
-
   };
 
   return (
