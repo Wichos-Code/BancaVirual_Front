@@ -74,7 +74,7 @@ export const Register = ({ switchAuthHandler }) => {
 
     const { success } = await register(payload);
     if (success) {
-      navigate("/bancavirtual/acceso/verificacion");
+      navigate("/bancavirtual/acceso/verificación");
     }
   };
 

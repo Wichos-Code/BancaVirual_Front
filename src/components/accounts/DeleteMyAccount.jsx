@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDeleteMyAccount } from '../../shared/hooks/useDeleteMyAccount';
 
-const DeleteMyAccount = ({ id, onDeleted }) => {
+export const DeleteMyAccount = ({ id, onDeleted }) => {
   const { fecthDeleteMyAccount, isLoading } = useDeleteMyAccount();
 
   const handleDelete = async () => {
@@ -22,5 +22,3 @@ const DeleteMyAccount = ({ id, onDeleted }) => {
     </>
   );
 };
-
-export default DeleteMyAccount;

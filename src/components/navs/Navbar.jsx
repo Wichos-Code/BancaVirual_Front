@@ -5,9 +5,10 @@ import { useNavigate } from "react-router-dom";
 
 const MENU = [
   { key: 'users',        label: 'Usuarios',     roles: [ "ADMIN_ROLE" ] },
-  { key: 'transfers',        label: 'Transferencias', roles: [ "ADMIN_ROLE", "CLIENT_ROLE","SUPERVISOR_ROLE" ] },
-  { key: 'accounts',      label: 'Cuentas',      roles: [ "ADMIN_ROLE", "CLIENT_ROLE","SUPERVISOR_ROLE" ]   },
-  { key: 'myaccounts',        label: 'Mis cuentas', roles: [ "ADMIN_ROLE", "CLIENT_ROLE","SUPERVISOR_ROLE" ] },
+  { key: 'accountsAdmin',      label: 'Cuentas',      roles: [ "SUPERVISOR_ROLE", "ADMIN_ROLE" ]   },
+  { key: 'accounts',      label: 'Aperturar',      roles: [ "SUPERVISOR_ROLE" , "ADMIN_ROLE" ]   },
+  { key: 'transfers',        label: 'Transferencias', roles: [ "CLIENT_ROLE","SUPERVISOR_ROLE" ] },
+  { key: 'myaccounts',        label: 'Mis cuentas', roles: [ "CLIENT_ROLE","SUPERVISOR_ROLE" ] },
 ];
 
 export const Navbar = ({ activeSection, onSelectSection }) => {

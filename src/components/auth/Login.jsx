@@ -31,6 +31,8 @@ export const Login = ({ switchAuthHandler }) => {
         const userDetails = JSON.parse(localStorage.getItem('user'));
         switch (userDetails?.role) {
           case "ADMIN_ROLE":
+            navigate("/bancavirtual/usuarios");
+            break;
           case "SUPERVISOR_ROLE":
           case "CLIENT_ROLE":
             navigate("/bancavirtual/transferencias");

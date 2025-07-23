@@ -6,6 +6,7 @@ import { useUserDetails } from "../../shared/hooks";
 const SECTIONS = {
   users: "/bancavirtual/usuarios",
   accounts: "/bancavirtual/cuentas",
+  accountsAdmin: "/bancavirtual/cuentas-admin",
   transfers: "/bancavirtual/transferencias",
   myaccounts: "/bancavirtual/mis-cuentas",
 };
@@ -22,12 +23,25 @@ export function Content() {
 
   const getActiveSection = () => {
     const currentPath = location.pathname;
+
     for (const key in SECTIONS) {
-      if (currentPath.startsWith(SECTIONS[key])) {
+      if (currentPath === SECTIONS[key]) {
         return key;
       }
     }
-    return "";
+
+    let longestMatchKey = "";
+    let longestMatchPathLength = 0;
+
+    for (const key in SECTIONS) {
+      if (currentPath.startsWith(SECTIONS[key])) {
+        if (SECTIONS[key].length > longestMatchPathLength) {
+          longestMatchPathLength = SECTIONS[key].length;
+          longestMatchKey = key;
+        }
+      }
+    }
+    return longestMatchKey;
   };
 
   const activeSection = getActiveSection();

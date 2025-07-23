@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useMyFavoriteAccounts } from '../../shared/hooks/useMyFavoriteAccounts';
 import { useNavigate } from 'react-router-dom';
-import DeleteMyAccount from './DeleteMyAccount';
+import { DeleteMyAccount } from './DeleteMyAccount';
 
 export const MyFavoritePage = () => {
     const { favorites, fetchFavorites, isLoading } = useMyFavoriteAccounts();
@@ -44,10 +44,6 @@ export const MyFavoritePage = () => {
                             <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-gray-900">Mis Cuentas</h2>
                             <div className="flex space-x-3">
-                                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center hover:bg-blue-700 transition-colors"
-                                onClick={() => goToNavigate('/bancavirtual/cuentas')}>
-                                Nueva Cuenta
-                                </button>
                                 <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg flex items-center hover:bg-gray-200 transition-colors"
                                 onClick={handleUpdate}>
                                 Actualizar
