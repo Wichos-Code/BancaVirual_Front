@@ -18,11 +18,7 @@ export const Navbar = ({ activeSection, onSelectSection }) => {
   
   return (
     <nav className="bg-[#163a5d] text-white px-6 py-3 flex items-center justify-between text-lg">
-      <img
-        src="/src/assets/img/LogoBF.png"
-        alt="Logo"
-        className="h-25 w-25 cursor-pointer"
-      />
+      <div></div>
 
       <div className="flex space-x-4">
         {MENU
