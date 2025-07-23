@@ -1,4 +1,4 @@
-
+// src/shared/hooks/useVerifyEmail.js
 import { useState, useCallback } from "react";
 import { verifyEmail as apiVerifyEmail } from "../../services/api";
 
@@ -9,17 +9,19 @@ export const useVerifyEmail = () => {
   const verify = useCallback(async (code) => {
     setIsLoading(true);
     setError(null);
-
-    const response = await apiVerifyEmail(code);
-
-    setIsLoading(false);
-
-    if (response.error) {
-      setError(response.e);
+    try {
+      const response = await apiVerifyEmail(code);
+      if (response.error) {
+        setError(response.e);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      setError(err);
       return false;
+    } finally {
+      setIsLoading(false);
     }
-
-    return true;
   }, []);
 
   return { verify, isLoading, error };

@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
+import { motion } from "framer-motion";
+
 import { Input } from "../Input";
-import { Logo } from "../Logo";
 import {
   validateName, validateNameMessage,
   validateSurname, validateSurnameMessage,
@@ -12,29 +13,32 @@ import {
   validateIncome, validateIncomeMessage,
   validateDirection, validateDirectionMessage,
   validatePhone, validatePhoneMessage,
+  validateWorkName, validateWorkNameMessage,
   validatePassword, validatePasswordMessage,
-  validatePasswordConfirm, validatePasswordConfirmMessage
+  validatePasswordConfirm
 } from "../../shared/validators";
 import { useRegister } from "../../shared/hooks/useRegister";
-import backgroundRegister from "../../assets/img/backgroundRegister.png";
+
+import { UserIcon, UserCircleIcon, CreditCardIcon, EnvelopeIcon, CurrencyDollarIcon, MapPinIcon, PhoneIcon, BuildingOfficeIcon, KeyIcon } from "@heroicons/react/24/outline";
+import fondo from "../../assets/img/FondoBF.png";
 
 export const Register = ({ switchAuthHandler }) => {
   const navigate = useNavigate();
   const { register, isLoading } = useRegister();
 
-  const initialState = {
-    name:             { value: "", isValid: false, showError: false },
-    surname:          { value: "", isValid: false, showError: false },
-    username:         { value: "", isValid: false, showError: false },
-    dpi:              { value: "", isValid: false, showError: false },
-    email:            { value: "", isValid: false, showError: false },
-    income:           { value: "", isValid: false, showError: false },
-    direction:        { value: "", isValid: false, showError: false },
-    phone:            { value: "", isValid: false, showError: false },
-    password:         { value: "", isValid: false, showError: false },
-    passwordConfirm:  { value: "", isValid: false, showError: false }
-  };
-  const [form, setForm] = useState(initialState);
+  const [form, setForm] = useState({
+    name: { value: "", isValid: false, showError: false },
+    surname: { value: "", isValid: false, showError: false },
+    username: { value: "", isValid: false, showError: false },
+    dpi: { value: "", isValid: false, showError: false },
+    email: { value: "", isValid: false, showError: false },
+    income: { value: "", isValid: false, showError: false },
+    direction: { value: "", isValid: false, showError: false },
+    phone: { value: "", isValid: false, showError: false },
+    workName: { value: "", isValid: false, showError: false },
+    password: { value: "", isValid: false, showError: false },
+    passwordConfirm: { value: "", isValid: false, showError: false }
+  });
 
   const onChange = useCallback((value, field) => {
     setForm(f => ({ ...f, [field]: { ...f[field], value } }));
@@ -43,198 +47,77 @@ export const Register = ({ switchAuthHandler }) => {
   const onBlur = useCallback((value, field) => {
     let valid = false;
     switch (field) {
-      case "name":      valid = validateName(value); break;
-      case "surname":   valid = validateSurname(value); break;
-      case "username":  valid = validateUsername(value); break;
-      case "dpi":       valid = validateDPI(value); break;
-      case "email":     valid = validateEmail(value); break;
-      case "income":    valid = validateIncome(value); break;
+      case "name": valid = validateName(value); break;
+      case "surname": valid = validateSurname(value); break;
+      case "username": valid = validateUsername(value); break;
+      case "dpi": valid = validateDPI(value); break;
+      case "email": valid = validateEmail(value); break;
+      case "income": valid = validateIncome(value); break;
       case "direction": valid = validateDirection(value); break;
-      case "phone":     valid = validatePhone(value); break;
-      case "password":  valid = validatePassword(value); break;
-      case "passwordConfirm":
-        valid = validatePasswordConfirm(form.password.value, value);
-        break;
+      case "phone": valid = validatePhone(value); break;
+      case "workName": valid = validateWorkName(value); break;
+      case "password": valid = validatePassword(value); break;
+      case "passwordConfirm": valid = validatePasswordConfirm(form.password.value, value); break;
       default: break;
     }
-    setForm(f => ({
-      ...f,
-      [field]: { ...f[field], isValid: valid, showError: !valid }
-    }));
+    setForm(f => ({ ...f, [field]: { ...f[field], isValid: valid, showError: !valid } }));
   }, [form.password.value]);
 
-  const handleSubmit = useCallback(async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const payload = {
-      name:       form.name.value,
-      surname:    form.surname.value,
-      username:   form.username.value,
-      dpi:        form.dpi.value,
-      email:      form.email.value,
-      income:     form.income.value,
-      direction:  form.direction.value,
-      phone:      form.phone.value,
-      password:   form.password.value
-    };
+    const payload = Object.keys(form).reduce((acc, key) => {
+      if (key !== 'passwordConfirm') {
+        acc[key] = form[key].value;
+      }
+      return acc;
+    }, {});
 
     const { success } = await register(payload);
     if (success) {
-      navigate("/bancavirtual/acceso/verificación");
+      navigate("/bancavirtual/acceso/verificacion");
     }
-  }, [form, register, navigate]);
+  };
 
-  const disabled = isLoading ||
-    !form.name.isValid ||
-    !form.surname.isValid ||
-    !form.username.isValid ||
-    !form.dpi.isValid ||
-    !form.email.isValid ||
-    !form.income.isValid ||
-    !form.direction.isValid ||
-    !form.phone.isValid ||
-    !form.password.isValid ||
-    !form.passwordConfirm.isValid;
+  const isFormInvalid = Object.values(form).some(field => !field.isValid);
+  const disabled = isLoading || isFormInvalid;
+  
+  const formVariants = {
+    initial: { opacity: 0, y: 50 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+    exit: { opacity: 0, y: 50 },
+  };
+
+  const buttonVariants = {
+    whileTap: { scale: 0.95 },
+    whileHover: { scale: 1.05 },
+  };
 
   return (
-    <div
-      className="min-h-screen w-full flex items-center justify-center bg-cover bg-center"
-      style={{
-        backgroundImage: `url(${backgroundRegister})`,
-        backgroundColor: "rgba(22, 58, 93, 0)",
-        backgroundBlendMode: "overlay"
-      }}
-    >
-      <div className="w-full max-w-md mx-auto bg-[#163a5d]/40 rounded-2xl p-8 flex flex-col items-center space-y-4 shadow-lg">
-        <Logo text="Bienvenido al registro" />
+    <div className="min-h-screen w-full flex items-center justify-center bg-cover bg-center bg-fixed" style={{ backgroundImage: `url(${fondo})` }}>
+      <motion.div variants={formVariants} initial="initial" animate="animate" exit="exit" className="w-full max-w-md mx-auto bg-white rounded-2xl p-8 my-8 flex flex-col items-center space-y-4 shadow-lg">
+        <span className="text-[#163a5d] font-bold text-3xl pb-4">Crea tu cuenta</span>
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3">
+          {/* Se mapean los inputs para un código más DRY, aunque dejarlos explícitos también está bien por claridad. Aquí los mantengo explícitos como en tu original. */}
+          <Input field="name" value={form.name.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.name.showError} validationMessage={validateNameMessage} type="text" placeholder="Nombres" Icon={UserIcon} />
+          <Input field="surname" value={form.surname.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.surname.showError} validationMessage={validateSurnameMessage} type="text" placeholder="Apellidos" Icon={UserIcon} />
+          <Input field="username" value={form.username.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.username.showError} validationMessage={validateUsernameMessage} type="text" placeholder="Nombre de usuario" Icon={UserCircleIcon} />
+          <Input field="dpi" value={form.dpi.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.dpi.showError} validationMessage={validateDPIMessage} type="text" placeholder="DPI" Icon={CreditCardIcon} />
+          <Input field="email" value={form.email.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.email.showError} validationMessage={validateEmailMessage} type="email" placeholder="ejemplo@gmail.com" Icon={EnvelopeIcon} />
+          <Input field="income" value={form.income.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.income.showError} validationMessage={validateIncomeMessage} type="number" placeholder="Ingreso mensual" Icon={CurrencyDollarIcon} />
+          <Input field="direction" value={form.direction.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.direction.showError} validationMessage={validateDirectionMessage} type="text" placeholder="Dirección" Icon={MapPinIcon} />
+          <Input field="phone" value={form.phone.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.phone.showError} validationMessage={validatePhoneMessage} type="tel" placeholder="+502 XXXX XXXX" Icon={PhoneIcon} />
+          <Input field="workName" value={form.workName.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.workName.showError} validationMessage={validateWorkNameMessage} type="text" placeholder="Nombre de tu empresa/trabajo" Icon={BuildingOfficeIcon} />
+          <Input field="password" value={form.password.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.password.showError} validationMessage={validatePasswordMessage} type="password" placeholder="Contraseña" Icon={KeyIcon} />
+          <Input field="passwordConfirm" value={form.passwordConfirm.value} onChangeHandler={onChange} onBlurHandler={onBlur} showErrorMessage={form.passwordConfirm.showError} validationMessage={`Las contraseñas deben coincidir.`} type="password" placeholder="Confirmar contraseña" Icon={KeyIcon} />
 
-        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
-          <Input
-            field="name"
-            value={form.name.value}
-            onChangeHandler={onChange}
-            onBlurHandler={onBlur}
-            showErrorMessage={form.name.showError}
-            validationMessage={validateNameMessage}
-            type="text"
-            placeholder="Nombres"
-          />
-          <Input
-            field="surname"
-            value={form.surname.value}
-            onChangeHandler={onChange}
-            onBlurHandler={onBlur}
-            showErrorMessage={form.surname.showError}
-            validationMessage={validateSurnameMessage}
-            type="text"
-            placeholder="Apellidos"
-          />
-          <Input
-            field="username"
-            value={form.username.value}
-            onChangeHandler={onChange}
-            onBlurHandler={onBlur}
-            showErrorMessage={form.username.showError}
-            validationMessage={validateUsernameMessage}
-            type="text"
-            placeholder="Nombre de usuario"
-          />
-          <Input
-            field="dpi"
-            value={form.dpi.value}
-            onChangeHandler={onChange}
-            onBlurHandler={onBlur}
-            showErrorMessage={form.dpi.showError}
-            validationMessage={validateDPIMessage}
-            type="text"
-            placeholder="DPI"
-          />
-          <Input
-            field="email"
-            value={form.email.value}
-            onChangeHandler={onChange}
-            onBlurHandler={onBlur}
-            showErrorMessage={form.email.showError}
-            validationMessage={validateEmailMessage}
-            type="email"
-            placeholder="ejemplo@gmail.com"
-          />
-          <Input
-            field="income"
-            value={form.income.value}
-            onChangeHandler={onChange}
-            onBlurHandler={onBlur}
-            showErrorMessage={form.income.showError}
-            validationMessage={validateIncomeMessage}
-            type="number"
-            placeholder="Ingreso"
-          />
-          <Input
-            field="direction"
-            value={form.direction.value}
-            onChangeHandler={onChange}
-            onBlurHandler={onBlur}
-            showErrorMessage={form.direction.showError}
-            validationMessage={validateDirectionMessage}
-            type="text"
-            placeholder="Dirección"
-          />
-          <Input
-            field="phone"
-            value={form.phone.value}
-            onChangeHandler={onChange}
-            onBlurHandler={onBlur}
-            showErrorMessage={form.phone.showError}
-            validationMessage={validatePhoneMessage}
-            type="tel"
-            placeholder="+502 1000 0000"
-          />
-          <Input
-            field="password"
-            value={form.password.value}
-            onChangeHandler={onChange}
-            onBlurHandler={onBlur}
-            showErrorMessage={form.password.showError}
-            validationMessage={validatePasswordMessage}
-            type="password"
-            placeholder="Contraseña"
-          />
-          <Input
-            field="passwordConfirm"
-            value={form.passwordConfirm.value}
-            onChangeHandler={onChange}
-            onBlurHandler={onBlur}
-            showErrorMessage={form.passwordConfirm.showError}
-            validationMessage={validatePasswordConfirmMessage}
-            type="password"
-            placeholder="Confirmar contraseña"
-          />
-
-          <button
-            type="submit"
-            disabled={disabled}
-            className="
-              w-60
-              mt-3
-              mx-auto
-              py-3
-              rounded-full
-              text-[#163a5d] bg-yellow-200
-              hover:opacity-90 disabled:opacity-50
-              transition
-            "
-            style={{ fontWeight: "620" }}
-          >
+          <motion.button type="submit" disabled={disabled} variants={buttonVariants} whileTap="whileTap" whileHover="whileHover" className="w-60 mt-3 mx-auto py-3 rounded-2xl text-[#163a5d] bg-yellow-200 font-semibold hover:opacity-90 transition disabled:opacity-50 disabled:bg-gray-400 disabled:hover:bg-gray-400">
             {isLoading ? "Creando cuenta…" : "Crear cuenta"}
-          </button>
+          </motion.button>
         </form>
-
-        <p
-          onClick={switchAuthHandler}
-          className="text-white hover:underline cursor-pointer mb-4 mt-2"
-        >
-          ¿Ya tienes cuenta? <strong>Inicia sesión</strong>
+        <p onClick={switchAuthHandler} className="text-[#163a5d] hover:underline cursor-pointer mt-2">
+          ¿Ya tienes cuenta? <span className="font-semibold">Inicia sesión</span>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 };

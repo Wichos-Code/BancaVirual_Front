@@ -1,215 +1,195 @@
-import React, { useEffect, useRef, useState } from "react";
+// src/components/Auth/VerifyEmail.jsx
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from "framer-motion";
 import { useVerifyEmail } from "../../shared/hooks/useVerifyEmail";
-import toast from "react-hot-toast";
+import fondo from "../../assets/img/FondoBF.png";
 
 export const VerifyEmail = () => {
   const navigate = useNavigate();
   const { verify, isLoading } = useVerifyEmail();
 
-  const [digits, setDigits] = useState(["", "", "", "", "", ""]);
-  const [status, setStatus] = useState("idle"); 
-
+  const [digits, setDigits] = useState(Array(6).fill(""));
+  const [status, setStatus] = useState("idle"); // 'idle' | 'loading' | 'success' | 'error'
   const inputsRef = useRef([]);
 
-  const handleChange = (e, idx) => {
-    const val = e.target.value;
-    if (!/^[0-9]?$/.test(val)) return;
+  const handleVerify = useCallback(
+    async (code) => {
+      setStatus("loading");
+      await new Promise((r) => setTimeout(r, 500));
+      const ok = await verify(code);
+      setStatus(ok ? "success" : "error");
+    },
+    [verify]
+  );
 
-    const newDigits = [...digits];
-    newDigits[idx] = val;
-    setDigits(newDigits);
+  const handleChange = useCallback(
+    (e, idx) => {
+      const val = e.target.value;
+      if (!/^[0-9]?$/.test(val)) return;
 
-    if (val && idx < 5) {
-      inputsRef.current[idx + 1].focus();
-    }
-  };
+      const newDigits = [...digits];
+      newDigits[idx] = val;
+      setDigits(newDigits);
 
-  const handleKeyDown = (e, idx) => {
-    if (e.key === "Backspace" && digits[idx] === "") {
-      if (idx > 0) {
-        inputsRef.current[idx - 1].focus();
+      if (val && idx < 5) {
+        inputsRef.current[idx + 1]?.focus();
       }
-    }
-  };
 
-  const handleSubmit = async (e) => {
+      // Auto‑submit when all filled
+      if (newDigits.every((d) => d !== "") && status === "idle") {
+        setTimeout(() => handleVerify(newDigits.join("")), 100);
+      }
+    },
+    [digits, status, handleVerify]
+  );
+
+  const handleKeyDown = useCallback(
+    (e, idx) => {
+      if (e.key === "Backspace" && digits[idx] === "" && idx > 0) {
+        inputsRef.current[idx - 1]?.focus();
+      }
+    },
+    [digits]
+  );
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const code = digits.join("");
-    if (code.length < 6) return;
-
-    setStatus("loading");
-    const ok = await verify(code);
-    setStatus(ok ? "success" : "error");
+    handleVerify(digits.join(""));
   };
 
+  // focus first input on idle
+  useEffect(() => {
+    if (status === "idle") {
+      inputsRef.current[0]?.focus();
+    }
+  }, [status]);
+
+  // navigate on success
   useEffect(() => {
     if (status === "success") {
-      const timeout = setTimeout(() => {
-        navigate("/bancavirtual/acceso");
-      }, 800);
-      return () => clearTimeout(timeout);
+      const t = setTimeout(() => navigate("/bancavirtual/acceso"), 2000);
+      return () => clearTimeout(t);
     }
   }, [status, navigate]);
 
-  if (status === "success") {
-    return (
-      <motion.div
-          style={{ backgroundSize: "200% 200%" }}
-          className="min-h-screen flex flex-col items-center justify-center px-4
-                     bg-gradient-to-br from-[#bcddff] to-[#61a3ff]"
-          initial={{ backgroundPosition: "0% 50%" }}
-          animate={{ backgroundPosition: "100% 50%" }}
-          transition={{
-            duration: 8,
-            ease: "linear",
-            repeat: Infinity,
-            repeatType: "reverse"
-          }}
-        >
-        <div className="bg-[#163a5d] p-8 rounded-2xl shadow-lg max-w-md w-full text-center text-white">
-          <p className="text-lg font-semibold">
-            ¡Verificación exitosa!
-          </p>
-        </div>
-      </motion.div>
-    );
-  }
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.8, y: -50 },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 250, damping: 15 } },
+  };
+  const buttonVariants = {
+    whileTap: { scale: 0.95 },
+    whileHover: { scale: 1.05 },
+    transition: { type: "spring", stiffness: 400, damping: 10 },
+  };
+  const contentVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+    exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
+  };
 
-  if (status === "loading" || isLoading) {
-    return (
-      <motion.div
-          style={{ backgroundSize: "200% 200%" }}
-          className="min-h-screen flex flex-col items-center justify-center px-4
-                     bg-gradient-to-br from-[#bcddff] to-[#61a3ff]"
-          initial={{ backgroundPosition: "0% 50%" }}
-          animate={{ backgroundPosition: "100% 50%" }}
-          transition={{
-            duration: 8,
-            ease: "linear",
-            repeat: Infinity,
-            repeatType: "reverse"
-          }}
-        >
-        <div className="bg-white p-8 rounded-2xl shadow-md max-w-md w-full text-center">
-          <p className="text-gray-600 text-lg">Verificando código…</p>
-        </div>
-      </motion.div>
-    );
-  }
+  const effectiveStatus = isLoading ? "loading" : status;
+  let content, bgColor = "bg-white", textColor = "text-[#163a5d]";
 
-  if (status === "error") {
-    return (
-      <motion.div
-          style={{ backgroundSize: "200% 200%" }}
-          className="min-h-screen flex flex-col items-center justify-center px-4
-                     bg-gradient-to-br from-[#bcddff] to-[#61a3ff]"
-          initial={{ backgroundPosition: "0% 50%" }}
-          animate={{ backgroundPosition: "100% 50%" }}
-          transition={{
-            duration: 8,
-            ease: "linear",
-            repeat: Infinity,
-            repeatType: "reverse"
-          }}
-        >
-        <div className="bg-[#163a5d] p-8 rounded-2xl max-w-md w-full text-center text-white">
-          <p className="text-red-500 font-semibold mb-6">
-            El código ingresado es inválido o ha expirado.
-          </p>
-          <button
-            className="w-60 py-3 mb-4 rounded-full bg-yellow-200 hover:opacity-90 text-[#163a5d] font-semibold transition"
+  switch (effectiveStatus) {
+    case "loading":
+      content = (
+        <motion.div variants={contentVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-center">
+          <p className="text-gray-600 mb-2">Verificando código…</p>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+            className="w-10 h-10 border-4 border-t-yellow-200 rounded-full"
+          />
+        </motion.div>
+      );
+      break;
+    case "success":
+      textColor = "text-green-600";
+      content = (
+        <motion.div variants={contentVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-center">
+          <p className="text-lg font-semibold">¡Verificación exitosa!</p>
+          <p className="text-sm text-gray-500 mt-2">Redirigiendo al inicio de sesión...</p>
+        </motion.div>
+      );
+      break;
+    case "error":
+      textColor = "text-red-400";
+      content = (
+        <motion.div variants={contentVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-center">
+          <p className="font-semibold mb-4">Código inválido o expirado</p>
+          <motion.button
+            className="w-full py-2 rounded-lg bg-yellow-200 text-[#163a5d] font-semibold mb-4"
             onClick={() => {
               setStatus("idle");
-              setDigits(["", "", "", "", "", ""]);
-              inputsRef.current[0].focus();
+              setDigits(Array(6).fill(""));
             }}
+            variants={buttonVariants}
+            whileTap="whileTap"
+            whileHover="whileHover"
           >
             Intentar de nuevo
-          </button>
-          
-          <button
-            className="w-full mt-3 text-white hover:underline"
-            onClick={() => navigate("/bancavirtual/acceso")}
-          >
+          </motion.button>
+          <button className="text-sm underline" onClick={() => navigate("/bancavirtual/acceso")}>
             Volver al inicio
           </button>
-        </div>
-      </motion.div>
-    );
+        </motion.div>
+      );
+      break;
+    default:
+      const canSubmit = digits.every((d) => d !== "") && !isLoading;
+      content = (
+        <motion.div variants={contentVariants} initial="initial" animate="animate" exit="exit" className="flex flex-col items-center">
+          <h2 className="text-2xl font-bold mb-4">Verifica tu cuenta</h2>
+          <p className="mb-6">Ingresa el código de 6 dígitos que enviamos a tu correo.</p>
+          <form onSubmit={handleSubmit} className="w-full space-y-6">
+            <div className="flex justify-center space-x-2">
+              {digits.map((d, i) => (
+                <input
+                  key={i}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={d}
+                  onChange={(e) => handleChange(e, i)}
+                  onKeyDown={(e) => handleKeyDown(e, i)}
+                  ref={(el) => (inputsRef.current[i] = el)}
+                  className="w-12 h-14 text-center text-2xl font-bold border rounded focus:outline-none"
+                />
+              ))}
+            </div>
+            <motion.button
+              type="submit"
+              disabled={!canSubmit}
+              className={`w-full py-2 rounded-lg font-semibold ${canSubmit ? "bg-yellow-200 text-[#163a5d]" : "bg-gray-300 text-gray-500"}`}
+              style={{ cursor: canSubmit ? "pointer" : "default" }}
+              variants={buttonVariants}
+              whileTap="whileTap"
+              whileHover="whileHover"
+            >
+              Verificar
+            </motion.button>
+          </form>
+          <button className="mt-4 text-sm underline" onClick={() => navigate("/bancavirtual/acceso")}>
+            Cancelar
+          </button>
+        </motion.div>
+      );
   }
 
   return (
-    <motion.div
-          style={{ backgroundSize: "200% 200%" }}
-          className="min-h-screen flex flex-col items-center justify-center px-4
-                     bg-gradient-to-br from-[#bcddff] to-[#61a3ff]"
-          initial={{ backgroundPosition: "0% 50%" }}
-          animate={{ backgroundPosition: "100% 50%" }}
-          transition={{
-            duration: 8,
-            ease: "linear",
-            repeat: Infinity,
-            repeatType: "reverse"
-          }}
-        >
-      <div className="bg-[#163a5d] p-8 rounded-2xl shadow-lg max-w-md w-full text-center text-white">
-        <h2 className="font-bold text-2xl mb-4">Escriba su código</h2>
-        <p className="text-gray-200 mb-6">
-          Escriba el código que enviamos a su correo electrónico.
-        </p>
-
-        <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-6">
-          <div className="flex space-x-2">
-            {[0, 1, 2, 3, 4, 5].map((idx) => (
-              <input
-                key={idx}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digits[idx]}
-                onChange={(e) => handleChange(e, idx)}
-                onKeyDown={(e) => handleKeyDown(e, idx)}
-                ref={(el) => (inputsRef.current[idx] = el)}
-                className="
-                  w-10 h-12
-                  text-center text-2xl
-                  border-b-2 border-gray-300
-                  focus:border-yellow-200 focus:outline-none
-                "
-              />
-            ))}
-          </div>
-
-          <button
-            type="submit"
-            disabled={digits.some((d) => d === "")}
-            className={`
-              w-60 
-              py-3 
-              rounded-full 
-              text-[#163a5d]
-              ${digits.every((d) => d !== "")
-                ? "bg-yellow-200 hover:opacity-90"
-                : "bg-gray-300"}
-              font-semibold transition
-            `}
-            style={{
-              cursor: digits.every((d) => d !== "") ? "pointer" : "default"
-            }}
-          >
-            Verificar
-          </button>
-        </form>
-
-        <button
-          className="mt-6 text-white hover:underline"
-          onClick={() => navigate("/bancavirtual/acceso")}
-        >
-          Cancelar y volver
-        </button>
-      </div>
-    </motion.div>
+    <div
+      className="min-h-screen flex items-center justify-center px-4 py-8 bg-cover bg-center"
+      style={{ backgroundImage: `url(${fondo})` }}
+    >
+      <motion.div
+        className={`${bgColor} p-6 rounded-2xl shadow-lg max-w-md w-full text-center ${textColor}`}
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <AnimatePresence mode="wait">{content}</AnimatePresence>
+      </motion.div>
+    </div>
   );
 };
